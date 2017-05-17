@@ -53644,8 +53644,14 @@ Sensor.sendEnvelope = function sendEnvelope(envelope) {
     self.error(messages[0]);
   }
    */
+
+  console.log('SENSOR ENVELOPE OUTSIDE = ' + JSON.stringify(envelope));
+
   if (clients.count() > 0) {
     clients.forEach(function(client) {
+
+      console.log('SENSOR ENVELOPE INSIDE = ' + JSON.stringify(envelope));
+
       client.sendEnvelope(envelope);
     });
   } else {
@@ -53948,8 +53954,14 @@ self.sendEnvelope = function sendEnvelope(envelope) {
     self.error(messages[0]);
   }
    */
+
+  console.log('CLIENT ENVELOPE OUTSIDE = ' + JSON.stringify(envelope));
+
   if (requestors.count() > 0) {
     requestors.forEach(function(requestor) {
+
+      console.log('CLIENT ENVELOPE INSIDE = ' + JSON.stringify(envelope));
+
       requestor.sendEnvelope(envelope);
     });
   } else {
