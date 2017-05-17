@@ -53097,7 +53097,6 @@ var http = require('http');
 var https = require('https');
 var config = require('../config/config');
 var logger = require('../logger');
-var moment = require('moment');
 var httpOptions = require('../config/httpOptions');
 var requestorUtils = require('./requestorUtils');
 
@@ -53282,7 +53281,7 @@ module.exports = {
   sendEnvelope: self.sendEnvelope
 };
 }).call(this,require("buffer").Buffer)
-},{"../config/config":238,"../config/httpOptions":239,"../logger":305,"./requestorUtils":307,"buffer":48,"http":151,"https":100,"lodash":106,"moment":109}],307:[function(require,module,exports){
+},{"../config/config":238,"../config/httpOptions":239,"../logger":305,"./requestorUtils":307,"buffer":48,"http":151,"https":100,"lodash":106}],307:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
