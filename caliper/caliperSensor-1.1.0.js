@@ -53182,7 +53182,7 @@ self.postEnvelope = function postEnvelope(envelope) {
   // Stringify the envelope
   var payload = self.stringify(envelope);
 
-  logger.log('debug', "Sending data " + JSON.stringify(data));
+  //logger.log('debug', "Sending data " + JSON.stringify(envelope));
 
   // Create the Envelope payload
   //var jsonPayload = requestor.getJsonPayload(sensor, data);
