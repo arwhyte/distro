@@ -53117,17 +53117,15 @@ var options = {};
 self.initialize = function initialize(id, opts) {
   _.isNil(id) ? self.error(messages[1]) : this.id = id;
   this.options = opts;
-  
-  //this.options = _.assign({}, httpOptions, opts);
+
+  //this.options = _.merge({}, httpOptions, opts);
   /**
   if (!_.isNil(opts)) {
-    this.options = _.assign({}, httpOptions, opts);
+    this.options = _.merge({}, httpOptions, opts);
   } else {
-    this.options = _.assign({}, httpOptions);
+    this.options = _.merge({}, httpOptions);
   }
    */
-
-  console.log("REQUESTOR INITIALIZATION WITH OPTS " + requestorUtils.stringify(this.options));
 
   this.initialized = true;
 };
@@ -53652,13 +53650,8 @@ Sensor.sendEnvelope = function sendEnvelope(envelope) {
   }
    */
 
-  console.log('SENSOR ENVELOPE OUTSIDE = ' + JSON.stringify(envelope));
-
   if (clients.count() > 0) {
     clients.forEach(function(client) {
-
-      console.log('SENSOR ENVELOPE INSIDE = ' + JSON.stringify(envelope));
-
       client.sendEnvelope(envelope);
     });
   } else {
@@ -53843,6 +53836,7 @@ if (typeof window !== 'undefined') {
   module.exports = Caliper
 }
 },{"./actions/actions":237,"./config/config":238,"./config/httpOptions":239,"./entities/agent/agent":240,"./entities/agent/courseOffering":241,"./entities/agent/courseSection":242,"./entities/agent/group":243,"./entities/agent/membership":244,"./entities/agent/organization":245,"./entities/agent/person":246,"./entities/agent/role":247,"./entities/agent/softwareApplication":248,"./entities/agent/status":249,"./entities/annotation/annotation":250,"./entities/annotation/bookmarkAnnotation":251,"./entities/annotation/highlightAnnotation":252,"./entities/annotation/sharedAnnotation":253,"./entities/annotation/tagAnnotation":254,"./entities/entity":255,"./entities/entityFactory":256,"./entities/entityType":257,"./entities/outcome/result":258,"./entities/resource/assessment":259,"./entities/resource/assessmentItem":260,"./entities/resource/assignableDigitalResource":261,"./entities/resource/attempt":262,"./entities/resource/audioObject":263,"./entities/resource/chapter":264,"./entities/resource/digitalResource":265,"./entities/resource/digitalResourceCollection":266,"./entities/resource/document":267,"./entities/resource/forum":268,"./entities/resource/frame":269,"./entities/resource/imageObject":270,"./entities/resource/learningObjective":271,"./entities/resource/mediaLocation":272,"./entities/resource/mediaObject":273,"./entities/resource/message":274,"./entities/resource/page":275,"./entities/resource/thread":276,"./entities/resource/videoObject":277,"./entities/resource/webPage":278,"./entities/response/fillinBlankResponse":279,"./entities/response/multipleChoiceResponse":280,"./entities/response/multipleResponseResponse":281,"./entities/response/response":282,"./entities/response/selectTextResponse":283,"./entities/response/trueFalseResponse":284,"./entities/session/ltiSession":285,"./entities/session/session":286,"./envelope":287,"./events/annotationEvent":288,"./events/assessmentEvent":289,"./events/assessmentItemEvent":290,"./events/assignableEvent":291,"./events/event":292,"./events/eventFactory":293,"./events/eventType":294,"./events/forumEvent":295,"./events/mediaEvent":296,"./events/messageEvent":297,"./events/navigationEvent":298,"./events/outcomeEvent":299,"./events/sessionEvent":301,"./events/threadEvent":302,"./events/toolUseEvent":303,"./events/viewEvent":304,"./logger":305,"./requestors/httpRequestor":306,"./requestors/requestorUtils":307,"./selectors/textPositionSelector":308,"./sensorclients/client":310,"./validators/entityValidator":311,"./validators/eventValidator":312,"./validators/validator":313,"hashmap":99,"lodash":106,"moment":109}],310:[function(require,module,exports){
+(function (Buffer){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -53862,9 +53856,12 @@ if (typeof window !== 'undefined') {
  */
 
 var _ = require('lodash');
+var http = require('http');
+var https = require('https');
 var config = require('../config/config');
-var hashMap = require('hashmap');
+var httpOptions = require('../config/httpOptions');
 var logger = require('../logger');
+var requestorUtils = require('../requestors/requestorUtils');
 
 /**
  * Caliper self.
@@ -53874,7 +53871,7 @@ var logger = require('../logger');
 var self = this;
 var id;
 var initialized = false;
-var requestors = new hashMap();
+var options = {};
 
 /**
  * Initializes the default client to use.
@@ -53883,8 +53880,19 @@ var requestors = new hashMap();
  * @function initialize
  * @param id requestor identifier
  */
-self.initialize = function initialize(id) {
+self.initialize = function initialize(id, options) {
   _.isNil(id) ? self.error(messages[1]) : this.id = id;
+  this.options = options;
+
+  //this.options = _.merge({}, httpOptions, options);
+  /**
+   if (!_.isNil(options)) {
+    this.options = _.merge({}, httpOptions, options);
+  } else {
+    this.options = _.merge({}, httpOptions);
+  }
+   */
+
   this.initialized = true;
 };
 
@@ -53909,89 +53917,123 @@ self.getId = function getId() {
 };
 
 /**
- * Register Requestor.
+ * Get Options.
  * @memberof client
- * @function registerRequestor
- * @param requestor
- */
-self.registerRequestor = function registerRequestor(requestor) {
-  requestors.set(requestor.id, requestor);
-};
-
-/**
- * Unregister Requestor.
- * @memberof client
- * @function unregisterRequestor
- * @param key
- */
-self.unregisterRequestor = function unregisterRequestor(key) {
-  requestors.remove(key);
-};
-
-/**
- * Retrieve a Requestor.
- * @memberof client
- * @function getRequestor
- * @param key
+ * @function getOptions
  * @returns {*}
  */
-self.getRequestor = function getRequestor(key) {
-  return requestors.get(key);
+self.getOptions = function getOptions() {
+  return this.options;
 };
 
 /**
- * Retrieve all registered Requestors.
- * @memberof client
- * @function getRequestors
- * @returns {HashMap}
+ * Post the Envelope.
+ * @memberof httpRequestor
+ * @function postEnvelope
+ * @param envelope
  */
-self.getRequestors = function getRequestors() {
-  return requestors;
+self.postEnvelope = function postEnvelope(envelope) {
+  /**
+   if (!self.isInitialized()) {
+    self.error(messages[0]);
+  }
+   */
+
+  /*
+   if (_.isNil(envelope)) {
+   self.error(messages[3]);
+   }
+   */
+
+  // Retrieve options
+  var options = this.getOptions();
+  options.headers["Content-Length"] = Buffer.byteLength(envelope); // decimal number of OCTETS per RFC 2616
+
+  console.log("Sensor Client options = " + JSON.stringify(options));
+
+  // Stringify the envelope
+  var payload = self.stringify(envelope);
+
+  logger.log('debug', "Sending data " + JSON.stringify(envelope));
+
+  // Create request
+  var request = http.request(options, function (response) {
+    logger.log('debug', "Response received = " + JSON.stringify(response));
+  }, function(error){
+    logger.log('error', "ERROR sending event = " + error);
+  });
+
+  // Write request
+  request.write(payload);
+  request.end();
+
+
+  // Create request
+
+  /**
+   if (opts.protocol === "https:") {
+    var request = https.request(opts, function(response) {
+      var res = "";
+      response.setEncoding('utf8');
+      response.on('data', function(chunk) {
+        res += chunk;
+      });
+      response.on('end', function() {
+        callback(res);
+      });
+    });
+
+    request.on('error', function(e) {
+      logger.log("error", e.message);
+    });
+
+    // Write data to request body.
+    request.write(payload);
+    logger.log("debug", messages[5] + payload);
+    request.end();
+
+  } else {
+    var request = http.request(opts, function(response) {
+      var res = "";
+      response.setEncoding('utf8');
+      response.on('data', function(chunk) {
+        res += chunk;
+      });
+      response.on('end', function() {
+        callback(res);
+      });
+    });
+
+    request.on('error', function(e) {
+      logger.log("error", e.message);
+    });
+
+    // Write data to request body.
+    request.write(payload);
+    request.end();
+  }
+   */
 };
 
 /**
- * Delegate serialization and transmission of the Envelope to all registered Requestors.
+ * Send Envelope
  * @memberof client
  * @function sendEnvelope
  * @param envelope
  */
 self.sendEnvelope = function sendEnvelope(envelope) {
-  /**
-  if (!self.isInitialized()) {
-    self.error(messages[0]);
-  }
-   */
-
-  console.log('CLIENT ENVELOPE OUTSIDE = ' + JSON.stringify(envelope));
-
-  if (requestors.count() > 0) {
-    requestors.forEach(function(requestor) {
-
-      console.log('CLIENT ENVELOPE INSIDE = ' + JSON.stringify(envelope));
-
-      requestor.sendEnvelope(envelope);
-    });
-  } else {
-    self.error(messages[2])
-  }
+  this.postEnvelope(envelope);
 };
 
 /**
- * Delegate serialization and transmission of the Envelope to a particular Requestor.
- * @memberof sensor
- * @function sendEnvelope
- * @param requestor
- * @param envelope
+ * Stringify the payload.
+ * @memberof client
+ * @function stringify
+ * @param payload
+ * @returns {*}
  */
-self.sendEnvelopeToRequestor = function sendEnvelopeToRequestor(requestor, envelope) {
-  if (!self.isInitialized()) {
-    self.error(messages[0]);
-  }
-  if (requestors.has(requestor.id)) {
-    requestor.sendEnvelope(envelope);
-  } else {
-    self.error(messages[3]);
-  }
+self.stringify = function stringify(payload) {
+  return requestorUtils.stringify(payload);
 };
 
 /**
@@ -54019,15 +54061,12 @@ module.exports = {
   initialize: self.initialize,
   initialized: self.isInitialized,
   getId: self.getId,
-  registerRequestor: self.registerRequestor,
-  unregisterRequestor: self.unregisterRequestor,
-  getRequestor: self.getRequestor,
-  getRequestors: self.getRequestors,
-  createEnvelope: self.createEnvelope,
-  sendEnvelope: self.sendEnvelope,
-  sendEnvelopeToRequestor: self.sendEnvelopeToRequestor
+  getOptions: self.getOptions,
+  postEnvelope: self.postEnvelope,
+  sendEnvelope: self.sendEnvelope
 };
-},{"../config/config":238,"../logger":305,"hashmap":99,"lodash":106}],311:[function(require,module,exports){
+}).call(this,require("buffer").Buffer)
+},{"../config/config":238,"../config/httpOptions":239,"../logger":305,"../requestors/requestorUtils":307,"buffer":48,"http":151,"https":100,"lodash":106}],311:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
