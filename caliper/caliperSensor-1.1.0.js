@@ -53073,7 +53073,6 @@ module.exports = {
 
 }).call(this,require('_process'))
 },{"_process":118,"caterpillar":52,"caterpillar-filter":50,"caterpillar-human":51,"fs":45}],306:[function(require,module,exports){
-(function (Buffer){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -53123,6 +53122,9 @@ self.initialize = function initialize(id, opts) {
       "Content-Length": null,
       "Content-Type": "application/json"
   };
+  this.options.method = "POST";
+
+
   //this.options = _.assign({}, httpOptions, opts);
   /**
   if (!_.isNil(opts)) {
@@ -53187,7 +53189,7 @@ self.postEnvelope = function postEnvelope(envelope) {
 */
 
   var opts = this.getOptions();
-  opts.headers["Content-Length"] = Buffer.byteLength(envelope); // decimal number of OCTETS per RFC 2616
+  //opts.headers["Content-Length"] = Buffer.byteLength(envelope); // decimal number of OCTETS per RFC 2616
 
   logger.log("debug", messages[4] + JSON.stringify(this.options));
 
@@ -53215,7 +53217,8 @@ self.postEnvelope = function postEnvelope(envelope) {
    */
 
   // Merge headers
-  var sendOptions = _.merge(options, {method: 'POST'}, {headers: headers});
+  var sendOptions = this.getOptions();
+  //var sendOptions = _.merge(options, {method: 'POST'}, {headers: headers});
 
   console.log('httpRequestor: about to request using sendOptions = ' + JSON.stringify(sendOptions));
 
@@ -53335,8 +53338,7 @@ module.exports = {
   postEnvelope: self.postEnvelope,
   sendEnvelope: self.sendEnvelope
 };
-}).call(this,require("buffer").Buffer)
-},{"../config/config":238,"../config/httpOptions":239,"../logger":305,"./requestorUtils":307,"buffer":48,"http":151,"https":100,"lodash":106}],307:[function(require,module,exports){
+},{"../config/config":238,"../config/httpOptions":239,"../logger":305,"./requestorUtils":307,"http":151,"https":100,"lodash":106}],307:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
