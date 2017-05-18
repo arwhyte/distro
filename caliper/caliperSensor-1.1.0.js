@@ -51396,7 +51396,7 @@ var entityFactory = function entityFactory() {
 };
 
 module.exports = entityFactory;
-},{"../validators/entityValidator":311,"../validators/validator":313,"./entity":255,"lodash":106}],257:[function(require,module,exports){
+},{"../validators/entityValidator":310,"../validators/validator":312,"./entity":255,"lodash":106}],257:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -52639,7 +52639,7 @@ var eventFactory = function eventFactory() {
 };
 
 module.exports = eventFactory;
-},{"../validators/eventValidator":312,"./event":292,"lodash":106}],294:[function(require,module,exports){
+},{"../validators/eventValidator":311,"./event":292,"lodash":106}],294:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -53092,391 +53092,6 @@ module.exports = {
  */
 
 var _ = require('lodash');
-var http = require('http');
-var https = require('https');
-var config = require('../config/config');
-var logger = require('../logger');
-var httpOptions = require('../config/httpOptions');
-var requestorUtils = require('./requestorUtils');
-
-/**
- * @constructor
- * @type {{}}
- */
-var self = this;
-var id;
-var initialized = false;
-var options = {};
-
-/**
- * Initialize Requestor.
- * @memberof httpRequestor
- * @function initialize
- * @param opts
- */
-self.initialize = function initialize(id, opts) {
-  _.isNil(id) ? self.error(messages[1]) : this.id = id;
-  this.options = opts;
-
-  //this.options = _.merge({}, httpOptions, opts);
-  /**
-  if (!_.isNil(opts)) {
-    this.options = _.merge({}, httpOptions, opts);
-  } else {
-    this.options = _.merge({}, httpOptions);
-  }
-   */
-
-  this.initialized = true;
-};
-
-/**
- * Check if Requestor is initialized.
- * @memberof httpRequestor
- * @function isInitialized
- * @returns {boolean}
- */
-self.isInitialized = function isInitialized() {
-  return this.initialized;
-};
-
-/**
- * Get the Requestor identifier.
- * @memberof httpRequestor
- * @function getId
- * @returns {*}
- */
-self.getId = function getId() {
-  return this.getId();
-};
-
-/**
- * Get Requestor Options.
- * @memberof httpRequestor
- * @function getOptions
- * @returns {*}
- */
-self.getOptions = function getOptions() {
-  return this.options;
-};
-
-/**
- * Post the Envelope.
- * @memberof httpRequestor
- * @function postEnvelope
- * @param envelope
- */
-self.postEnvelope = function postEnvelope(envelope) {
-  /**
-  if (!self.isInitialized()) {
-    self.error(messages[0]);
-  }
-   */
-
-  /*
-  if (_.isNil(envelope)) {
-    self.error(messages[3]);
-  }
-*/
-
-  var opts = this.getOptions();
-  //opts.headers["Content-Length"] = Buffer.byteLength(envelope); // decimal number of OCTETS per RFC 2616
-
-  logger.log("debug", messages[4] + JSON.stringify(this.options));
-
-  // Stringify the envelope
-  var payload = self.stringify(envelope);
-
-  //logger.log('debug', "Sending data " + JSON.stringify(envelope));
-
-  // Create the Envelope payload
-  //var jsonPayload = requestor.getJsonPayload(sensor, data);
-
-  logger.log('debug', "Added data to envelope " + JSON.stringify(payload));
-
-  // Add Headers
-  var headers = {
-    'Content-Type': 'application/json'
-  };
-
-  // Add Headers
-  /**
-  var headers = {
-    'Content-Type': 'application/json',
-    'Content-Length': payload.length
-  };
-   */
-
-  // Merge headers
-  var sendOptions = this.getOptions();
-  //var sendOptions = _.merge(options, {method: 'POST'}, {headers: headers});
-
-  console.log('httpRequestor: about to request using sendOptions = ' + JSON.stringify(sendOptions));
-
-  // Create request
-  var request = http.request(sendOptions, function (response) {
-    logger.log('info', "finished sending. Response = " + JSON.stringify(response));
-  }, function(error){
-    logger.log('error', "ERROR sending event = " + ERROR);
-  });
-
-  // Write request
-  request.write(payload);
-  request.end();
-
-
-  // Create request
-
-  /**
-  if (opts.protocol === "https:") {
-    var request = https.request(opts, function(response) {
-      var res = "";
-      response.setEncoding('utf8');
-      response.on('data', function(chunk) {
-        res += chunk;
-      });
-      response.on('end', function() {
-        callback(res);
-      });
-    });
-
-    request.on('error', function(e) {
-      logger.log("error", e.message);
-    });
-
-    // Write data to request body.
-    request.write(payload);
-    logger.log("debug", messages[5] + payload);
-    request.end();
-
-  } else {
-    var request = http.request(opts, function(response) {
-      var res = "";
-      response.setEncoding('utf8');
-      response.on('data', function(chunk) {
-        res += chunk;
-      });
-      response.on('end', function() {
-        callback(res);
-      });
-    });
-
-    request.on('error', function(e) {
-      logger.log("error", e.message);
-    });
-
-    // Write data to request body.
-    request.write(payload);
-    request.end();
-  }
-   */
-};
-
-/**
- * Send Envelope
- * @memberof httpRequestor
- * @function sendEnvelope
- * @param envelope
- */
-self.sendEnvelope = function sendEnvelope(envelope) {
-  /**
-   if (!self.isInitialized()) {
-    self.error(messages[0]);
-  }
-   */
-  this.postEnvelope(envelope);
-};
-
-/**
- * Stringify the payload.
- * @memberof httpRequestor
- * @function stringify
- * @param payload
- * @returns {*}
- */
-self.stringify = function stringify(payload) {
-  return requestorUtils.stringify(payload);
-};
-
-/**
- * Error Handler.
- * @memberof httpRequestor
- * @function error
- * @param message
- */
-self.error = function error(message) {
-  throw new Error(message);
-};
-
-/**
- * Error messages.
- * @memberof httpRequestor
- */
-var messages = [
-  "Caliper requestor has not been initialized.",
-  "Caliper requestor identifier (id) has not been provided.",
-  "Caliper requestor options have not been provided.",
-  "Caliper envelope has not been provided.",
-  "Caliper request headers set: ",
-  "Caliper envelope sent: "
-];
-
-module.exports = {
-  initialize: self.initialize,
-  isInitialized: self.isInitialized,
-  getId: self.getId,
-  getOptions: self.getOptions,
-  postEnvelope: self.postEnvelope,
-  sendEnvelope: self.sendEnvelope
-};
-},{"../config/config":238,"../config/httpOptions":239,"../logger":305,"./requestorUtils":307,"http":151,"https":100,"lodash":106}],307:[function(require,module,exports){
-/*
- * This file is part of IMS Caliper Analytics™ and is licensed to
- * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
- * under one or more contributor license agreements.  See the NOTICE
- * file distributed with this work for additional information.
- *
- * IMS Caliper is free software: you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation, version 3 of the License.
- *
- * IMS Caliper is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License along
- * with this program. If not, see http://www.gnu.org/licenses/.
- */
-
-// var logger = require('../logger');
-var validator = require('../validators/validator');
-
-var objectProperties = ["actor", "annotated", "annotator", "assignable", "assignee", "attempt", "edApp", "federatedSession",
-"generated", "group", "isPartOf", "member", "membership", "object", "organization", "referrer", "replyTo", "scoredBy",
-"session", "subOrganizationOf", "target", "user"];
-
-/*
-var arrayProperties = ["attachments", "creators", "extensions", "items", "keywords", "learningObjectives", "members",
-"roles", "tags", "values", "withAgents"];
-*/
-
-const regexCtx = /http:\/\/purl.imsglobal.org\/ctx\/caliper\/?v?[0-9]*p?[0-9]*/;
-
-/**
- * Represents requestorUtils self.
- * @constructor requestorUtils
- */
-var self = this;
-
-/**
- * Delete @context property if value corresponds to the IMS Caliper context IRI.
- * @param obj
- * @returns {*}
- */
-self.deleteContext = function deleteContext(obj) {
-  if (obj.hasOwnProperty("@context")) {
-    if (regexCtx.test(obj["@context"])) {
-      delete obj["@context"];
-    }
-  }
-  return obj;
-};
-
-/**
- * Convert a JSON string to an object.
- * @param obj
- */
-self.parse = function parse(obj) {
-  // if (validator.checkObjectType(obj) === '[object, Object]') { // Error: SyntaxError: Unexpected token o in JSON at position 1
-  if (typeof obj === "object") {
-    return JSON.parse(self.stringify(obj));
-  } else {
-    return JSON.parse(obj);
-  }
-};
-
-/**
- * Serializer replacer function that removes properties with values that are either null or empty or
- * represent a duplicate Caliper @context property.  Note that the Envelope.data array may contain
- * one or more events or describes (i.e., entities).  In such cases, @context property filtering is
- * applied only to the object properties of each event or entity comprising the array.
- * @param key
- * @param val
- * @returns {*}
- */
-self.replacer = function replacer(key, val) {
-  if (val === null) {
-    // logger.log("debug", "".concat("REMOVED ", key, " IS NULL"));
-    return undefined;
-  }
-
-  if (validator.checkObjectType(val) === '[object Object]') {
-    if (Object.keys(val).length === 0) {
-      // logger.log("debug", "".concat("REMOVED ", key, " IS EMPTY"));
-      return undefined;
-    } else {
-      if (objectProperties.indexOf(key) >= 0) {
-        val = self.deleteContext(val);
-      }
-    }
-  }
-
-  if (validator.checkObjectType(val) === '[object String]') {
-    if (val.length === 0 || /^\s*$/.test(val)) {
-      // logger.log("debug", "".concat("REMOVED ", key, " IS BLANK"));
-      return undefined;
-    }
-  }
-
-  if (validator.checkObjectType(val) === '[object Array]') {
-    if (val.length === 0) {
-      // logger.log("debug", "".concat("REMOVED ", key, " IS EMPTY"));
-      return undefined;
-    } else {
-      if (key != "data") {
-        for (var i = 0, len = val.length; i < len; i++) {
-          if (typeof val[i] === "object") {
-            val[i] = self.deleteContext(val[i]);
-          }
-        }
-      }
-    }
-  }
-    return val;
-  };
-
-/**
- * Convert an object to a JSON string after first flattening it and then subjecting to a replacer filter.
- * @param obj
- */
-self.stringify = function stringify(obj) {
-  return JSON.stringify(obj, self.replacer);
-};
-
-module.exports = {
-  parse: self.parse,
-  stringify: self.stringify
-};
-},{"../validators/validator":313}],308:[function(require,module,exports){
-/*
- * This file is part of IMS Caliper Analytics™ and is licensed to
- * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
- * under one or more contributor license agreements.  See the NOTICE
- * file distributed with this work for additional information.
- *
- * IMS Caliper is free software: you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation, version 3 of the License.
- *
- * IMS Caliper is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License along
- * with this program. If not, see http://www.gnu.org/licenses/.
- */
-
-var _ = require('lodash');
 
 /**
  * TextPositionSelector describes a range of text based on its start and end positions.  The text MUST be
@@ -53487,7 +53102,7 @@ var _ = require('lodash');
 var textPositionSelector = {type: "TextPositionSelector", start: null, end: null};
 
 module.exports = textPositionSelector;
-},{"lodash":106}],309:[function(require,module,exports){
+},{"lodash":106}],307:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -53712,7 +53327,6 @@ Caliper.Constants = {};
 Caliper.Entities = {};
 Caliper.Envelopes = {};
 Caliper.Events = {};
-Caliper.Requestors = {};
 Caliper.Selectors = {};
 Caliper.SensorClients = {};
 Caliper.Validators = {};
@@ -53810,15 +53424,12 @@ Caliper.Events.ThreadEvent                 = require('./events/threadEvent');
 Caliper.Events.ToolUseEvent                = require('./events/toolUseEvent');
 Caliper.Events.ViewEvent                   = require('./events/viewEvent');
 
-// Requestors
-Caliper.Requestors.HttpRequestor           = require('./requestors/httpRequestor');
-Caliper.Requestors.RequestorUtils          = require('./requestors/requestorUtils');
-
 // Selectors
 Caliper.Selectors.TextPositionSelector     = require('./selectors/textPositionSelector');
 
 // Sensor clients
-Caliper.SensorClients.Client               = require('./sensorclients/client');
+Caliper.SensorClients.HttpClient           = require('./sensorclients/httpClient');
+Caliper.SensorClients.ClientUtils          = require('./sensorclients/clientUtils');
 
 // Validators
 Caliper.Validators.Validator               = require('./validators/validator');
@@ -53835,7 +53446,135 @@ if (typeof window !== 'undefined') {
 } else {
   module.exports = Caliper
 }
-},{"./actions/actions":237,"./config/config":238,"./config/httpOptions":239,"./entities/agent/agent":240,"./entities/agent/courseOffering":241,"./entities/agent/courseSection":242,"./entities/agent/group":243,"./entities/agent/membership":244,"./entities/agent/organization":245,"./entities/agent/person":246,"./entities/agent/role":247,"./entities/agent/softwareApplication":248,"./entities/agent/status":249,"./entities/annotation/annotation":250,"./entities/annotation/bookmarkAnnotation":251,"./entities/annotation/highlightAnnotation":252,"./entities/annotation/sharedAnnotation":253,"./entities/annotation/tagAnnotation":254,"./entities/entity":255,"./entities/entityFactory":256,"./entities/entityType":257,"./entities/outcome/result":258,"./entities/resource/assessment":259,"./entities/resource/assessmentItem":260,"./entities/resource/assignableDigitalResource":261,"./entities/resource/attempt":262,"./entities/resource/audioObject":263,"./entities/resource/chapter":264,"./entities/resource/digitalResource":265,"./entities/resource/digitalResourceCollection":266,"./entities/resource/document":267,"./entities/resource/forum":268,"./entities/resource/frame":269,"./entities/resource/imageObject":270,"./entities/resource/learningObjective":271,"./entities/resource/mediaLocation":272,"./entities/resource/mediaObject":273,"./entities/resource/message":274,"./entities/resource/page":275,"./entities/resource/thread":276,"./entities/resource/videoObject":277,"./entities/resource/webPage":278,"./entities/response/fillinBlankResponse":279,"./entities/response/multipleChoiceResponse":280,"./entities/response/multipleResponseResponse":281,"./entities/response/response":282,"./entities/response/selectTextResponse":283,"./entities/response/trueFalseResponse":284,"./entities/session/ltiSession":285,"./entities/session/session":286,"./envelope":287,"./events/annotationEvent":288,"./events/assessmentEvent":289,"./events/assessmentItemEvent":290,"./events/assignableEvent":291,"./events/event":292,"./events/eventFactory":293,"./events/eventType":294,"./events/forumEvent":295,"./events/mediaEvent":296,"./events/messageEvent":297,"./events/navigationEvent":298,"./events/outcomeEvent":299,"./events/sessionEvent":301,"./events/threadEvent":302,"./events/toolUseEvent":303,"./events/viewEvent":304,"./logger":305,"./requestors/httpRequestor":306,"./requestors/requestorUtils":307,"./selectors/textPositionSelector":308,"./sensorclients/client":310,"./validators/entityValidator":311,"./validators/eventValidator":312,"./validators/validator":313,"hashmap":99,"lodash":106,"moment":109}],310:[function(require,module,exports){
+},{"./actions/actions":237,"./config/config":238,"./config/httpOptions":239,"./entities/agent/agent":240,"./entities/agent/courseOffering":241,"./entities/agent/courseSection":242,"./entities/agent/group":243,"./entities/agent/membership":244,"./entities/agent/organization":245,"./entities/agent/person":246,"./entities/agent/role":247,"./entities/agent/softwareApplication":248,"./entities/agent/status":249,"./entities/annotation/annotation":250,"./entities/annotation/bookmarkAnnotation":251,"./entities/annotation/highlightAnnotation":252,"./entities/annotation/sharedAnnotation":253,"./entities/annotation/tagAnnotation":254,"./entities/entity":255,"./entities/entityFactory":256,"./entities/entityType":257,"./entities/outcome/result":258,"./entities/resource/assessment":259,"./entities/resource/assessmentItem":260,"./entities/resource/assignableDigitalResource":261,"./entities/resource/attempt":262,"./entities/resource/audioObject":263,"./entities/resource/chapter":264,"./entities/resource/digitalResource":265,"./entities/resource/digitalResourceCollection":266,"./entities/resource/document":267,"./entities/resource/forum":268,"./entities/resource/frame":269,"./entities/resource/imageObject":270,"./entities/resource/learningObjective":271,"./entities/resource/mediaLocation":272,"./entities/resource/mediaObject":273,"./entities/resource/message":274,"./entities/resource/page":275,"./entities/resource/thread":276,"./entities/resource/videoObject":277,"./entities/resource/webPage":278,"./entities/response/fillinBlankResponse":279,"./entities/response/multipleChoiceResponse":280,"./entities/response/multipleResponseResponse":281,"./entities/response/response":282,"./entities/response/selectTextResponse":283,"./entities/response/trueFalseResponse":284,"./entities/session/ltiSession":285,"./entities/session/session":286,"./envelope":287,"./events/annotationEvent":288,"./events/assessmentEvent":289,"./events/assessmentItemEvent":290,"./events/assignableEvent":291,"./events/event":292,"./events/eventFactory":293,"./events/eventType":294,"./events/forumEvent":295,"./events/mediaEvent":296,"./events/messageEvent":297,"./events/navigationEvent":298,"./events/outcomeEvent":299,"./events/sessionEvent":301,"./events/threadEvent":302,"./events/toolUseEvent":303,"./events/viewEvent":304,"./logger":305,"./selectors/textPositionSelector":306,"./sensorclients/clientUtils":308,"./sensorclients/httpClient":309,"./validators/entityValidator":310,"./validators/eventValidator":311,"./validators/validator":312,"hashmap":99,"lodash":106,"moment":109}],308:[function(require,module,exports){
+/*
+ * This file is part of IMS Caliper Analytics™ and is licensed to
+ * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
+ * under one or more contributor license agreements.  See the NOTICE
+ * file distributed with this work for additional information.
+ *
+ * IMS Caliper is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation, version 3 of the License.
+ *
+ * IMS Caliper is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License along
+ * with this program. If not, see http://www.gnu.org/licenses/.
+ */
+
+// var logger = require('../logger');
+var validator = require('../validators/validator');
+
+var objectProperties = ["actor", "annotated", "annotator", "assignable", "assignee", "attempt", "edApp", "federatedSession",
+"generated", "group", "isPartOf", "member", "membership", "object", "organization", "referrer", "replyTo", "scoredBy",
+"session", "subOrganizationOf", "target", "user"];
+
+/*
+var arrayProperties = ["attachments", "creators", "extensions", "items", "keywords", "learningObjectives", "members",
+"roles", "tags", "values", "withAgents"];
+*/
+
+const regexCtx = /http:\/\/purl.imsglobal.org\/ctx\/caliper\/?v?[0-9]*p?[0-9]*/;
+
+/**
+ * Represents clientUtils self.
+ * @constructor clientUtils
+ */
+var self = this;
+
+/**
+ * Delete @context property if value corresponds to the IMS Caliper context IRI.
+ * @param obj
+ * @returns {*}
+ */
+self.deleteContext = function deleteContext(obj) {
+  if (obj.hasOwnProperty("@context")) {
+    if (regexCtx.test(obj["@context"])) {
+      delete obj["@context"];
+    }
+  }
+  return obj;
+};
+
+/**
+ * Convert a JSON string to an object.
+ * @param obj
+ */
+self.parse = function parse(obj) {
+  // if (validator.checkObjectType(obj) === '[object, Object]') { // Error: SyntaxError: Unexpected token o in JSON at position 1
+  if (typeof obj === "object") {
+    return JSON.parse(self.stringify(obj));
+  } else {
+    return JSON.parse(obj);
+  }
+};
+
+/**
+ * Serializer replacer function that removes properties with values that are either null or empty or
+ * represent a duplicate Caliper @context property.  Note that the Envelope.data array may contain
+ * one or more events or describes (i.e., entities).  In such cases, @context property filtering is
+ * applied only to the object properties of each event or entity comprising the array.
+ * @param key
+ * @param val
+ * @returns {*}
+ */
+self.replacer = function replacer(key, val) {
+  if (val === null) {
+    // logger.log("debug", "".concat("REMOVED ", key, " IS NULL"));
+    return undefined;
+  }
+
+  if (validator.checkObjectType(val) === '[object Object]') {
+    if (Object.keys(val).length === 0) {
+      // logger.log("debug", "".concat("REMOVED ", key, " IS EMPTY"));
+      return undefined;
+    } else {
+      if (objectProperties.indexOf(key) >= 0) {
+        val = self.deleteContext(val);
+      }
+    }
+  }
+
+  if (validator.checkObjectType(val) === '[object String]') {
+    if (val.length === 0 || /^\s*$/.test(val)) {
+      // logger.log("debug", "".concat("REMOVED ", key, " IS BLANK"));
+      return undefined;
+    }
+  }
+
+  if (validator.checkObjectType(val) === '[object Array]') {
+    if (val.length === 0) {
+      // logger.log("debug", "".concat("REMOVED ", key, " IS EMPTY"));
+      return undefined;
+    } else {
+      if (key != "data") {
+        for (var i = 0, len = val.length; i < len; i++) {
+          if (typeof val[i] === "object") {
+            val[i] = self.deleteContext(val[i]);
+          }
+        }
+      }
+    }
+  }
+    return val;
+  };
+
+/**
+ * Convert an object to a JSON string after first flattening it and then subjecting to a replacer filter.
+ * @param obj
+ */
+self.stringify = function stringify(obj) {
+  return JSON.stringify(obj, self.replacer);
+};
+
+module.exports = {
+  parse: self.parse,
+  stringify: self.stringify
+};
+},{"../validators/validator":312}],309:[function(require,module,exports){
 (function (Buffer){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
@@ -53861,7 +53600,7 @@ var https = require('https');
 var config = require('../config/config');
 var httpOptions = require('../config/httpOptions');
 var logger = require('../logger');
-var requestorUtils = require('../requestors/requestorUtils');
+var clientUtils = require('./clientUtils');
 
 /**
  * Caliper self.
@@ -53878,7 +53617,7 @@ var options = {};
  * Client#initialize
  * @memberof client
  * @function initialize
- * @param id requestor identifier
+ * @param id client identifier
  */
 self.initialize = function initialize(id, options) {
   _.isNil(id) ? self.error(messages[1]) : this.id = id;
@@ -54033,7 +53772,7 @@ self.sendEnvelope = function sendEnvelope(envelope) {
  * @returns {*}
  */
 self.stringify = function stringify(payload) {
-  return requestorUtils.stringify(payload);
+  return clientUtils.stringify(payload);
 };
 
 /**
@@ -54066,7 +53805,7 @@ module.exports = {
   sendEnvelope: self.sendEnvelope
 };
 }).call(this,require("buffer").Buffer)
-},{"../config/config":238,"../config/httpOptions":239,"../logger":305,"../requestors/requestorUtils":307,"buffer":48,"http":151,"https":100,"lodash":106}],311:[function(require,module,exports){
+},{"../config/config":238,"../config/httpOptions":239,"../logger":305,"./clientUtils":308,"buffer":48,"http":151,"https":100,"lodash":106}],310:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -54115,7 +53854,7 @@ module.exports.checkOpts = function opts(delegate, opts) {
   });
   return opts;
 };
-},{"./validator":313}],312:[function(require,module,exports){
+},{"./validator":312}],311:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -54189,7 +53928,7 @@ module.exports.checkOpts = function opts(delegate, opts) {
   });
   return opts;
 };
-},{"../config/config":238,"./validator":313}],313:[function(require,module,exports){
+},{"../config/config":238,"./validator":312}],312:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -54465,4 +54204,4 @@ module.exports.moveToExtensions = function moveToExtensions(proto, opts) {
 
   return opts;
 };
-},{"../config/config":238,"../entities/entityType":257,"../events/eventType":294,"lodash":106,"moment":109,"node-uuid":110,"uri-js":163,"validator":170}]},{},[237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258,259,260,261,262,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,278,279,280,281,282,283,284,285,286,287,288,289,290,291,292,293,294,295,296,297,298,299,300,301,302,303,304,305,306,307,308,309,310,311,312,313]);
+},{"../config/config":238,"../entities/entityType":257,"../events/eventType":294,"lodash":106,"moment":109,"node-uuid":110,"uri-js":163,"validator":170}]},{},[237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258,259,260,261,262,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,278,279,280,281,282,283,284,285,286,287,288,289,290,291,292,293,294,295,296,297,298,299,300,301,302,303,304,305,306,307,308,309,310,311,312]);
