@@ -96047,6 +96047,8 @@ self.initialize = function initialize(id, options) {
   _.isNil(id) ? self.error(messages[1]) : this.id = id;
   _.isEmpty(options) ? self.error(messages[5]) : this.options = options;
   this.initialized = true;
+
+  console.log("CLIENTINIT: " + this.isInitialized());
 };
 
 /**
@@ -96086,6 +96088,9 @@ self.getOptions = function getOptions() {
  * @param envelope
  */
 self.send = function send(envelope) {
+
+  console.log("SENDINIT: " + this.isInitialized());
+  
   if (!self.isInitialized()) {
     self.error(messages[0]);
   }
@@ -96156,7 +96161,7 @@ var messages = [
 
 module.exports = {
   initialize: self.initialize,
-  initialized: self.isInitialized,
+  isInitialized: self.isInitialized,
   getId: self.getId,
   getOptions: self.getOptions,
   send: self.send
@@ -96503,7 +96508,7 @@ var messages = [
 
 module.exports = {
   initialize: self.initialize,
-  initialized: self.isInitialized,
+  isInitialized: self.isInitialized,
   getId: self.getId,
   getOptions: self.getOptions,
   send: self.send
