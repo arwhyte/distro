@@ -96034,7 +96034,7 @@ var clientUtils = require('./clientUtils');
 var self = this;
 var id;
 var initialized = false;
-var options = {};
+var options;
 
 /**
  * Initializes the default client to use.
@@ -96048,6 +96048,8 @@ self.initialize = function initialize(id, options) {
   //_.isNil(options) ? self.error(messages[5]) : this.options = options;
   this.options = options;
   this.initialized = true;
+
+  console.log("INIT_OPTIONS: " + options.uri);
 };
 
 /**
@@ -96097,18 +96099,22 @@ self.send = function send(envelope) {
    }
 */
 
+  var opts = this.getOptions();
+
+  console.log("SEND_OPTIONS: " + opts.method);
+
   // Add
-  options.headers["Content-Length"] = Buffer.byteLength(envelope); // decimal number of OCTETS per RFC 2616
-  options.body = self.stringify(envelope);
+  opts.headers["Content-Length"] = Buffer.byteLength(envelope); // decimal number of OCTETS per RFC 2616
+  opts.body = self.stringify(envelope);
 
 /**
   var opts = this.getOptions();
   opts.headers["Content-Length"] = Buffer.byteLength(envelope); // decimal number of OCTETS per RFC 2616
   opts.body = self.stringify(envelope);
 */
-  console.log("Sensor Client options = " + JSON.stringify(options));
+  console.log("Sensor Client options = " + JSON.stringify(opts));
 
-  request(options, function (err, res, body) {
+  request(opts, function (err, res, body) {
     if (err) {
       console.error('error posting JSON: ', err);
       throw err
