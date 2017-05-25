@@ -96044,11 +96044,11 @@ var options;
  * @param id client identifier
  */
 self.initialize = function initialize(id, options) {
-  _.isNil(id) ? self.error(messages[1]) : this.id = id;
-  _.isEmpty(options) ? self.error(messages[5]) : this.options = options;
+  _.isNil(id) ? this.error(messages[1]) : this.id = id;
+  _.isEmpty(options) ? this.error(messages[5]) : this.options = options;
   this.initialized = true;
 
-  console.log("CLIENTINIT: " + this.isInitialized());
+  //console.log("CLIENTINIT: " + this.isInitialized());
 };
 
 /**
@@ -96088,19 +96088,16 @@ self.getOptions = function getOptions() {
  * @param envelope
  */
 self.send = function send(envelope) {
-
-  console.log("SENDINIT: " + this.isInitialized());
-  
-  if (!self.isInitialized()) {
-    self.error(messages[0]);
+  if (!this.isInitialized()) {
+    this.error(messages[0]);
   }
   if (_.isEmpty(envelope)) {
-    self.error(messages[3]);
+    this.error(messages[3]);
   }
 
   // Calculate Envelope length and then stringify it.
   var contentLength = Buffer.byteLength(envelope); // decimal number of OCTETS per RFC 2616
-  var stringEntity = self.stringify(envelope);
+  var stringEntity = this.stringify(envelope);
 
   // Retrieve options and add Content-Length header and body.
   var opts = this.getOptions();
