@@ -96097,14 +96097,18 @@ self.send = function send(envelope) {
    }
 */
 
-  // Retrieve options
+  // Add
+  options.headers["Content-Length"] = Buffer.byteLength(envelope); // decimal number of OCTETS per RFC 2616
+  options.body = self.stringify(envelope);
+
+/**
   var opts = this.getOptions();
   opts.headers["Content-Length"] = Buffer.byteLength(envelope); // decimal number of OCTETS per RFC 2616
   opts.body = self.stringify(envelope);
+*/
+  console.log("Sensor Client options = " + JSON.stringify(options));
 
-  console.log("Sensor Client options = " + JSON.stringify(opts));
-
-  request(opts, function (err, res, body) {
+  request(options, function (err, res, body) {
     if (err) {
       console.error('error posting JSON: ', err);
       throw err
