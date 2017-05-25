@@ -96046,7 +96046,7 @@ var options = {};
 self.initialize = function initialize(id, options) {
   _.isNil(id) ? self.error(messages[1]) : this.id = id;
   //_.isNil(options) ? self.error(messages[5]) : this.options = options;
-  this.optons = options;
+  this.options = options;
   this.initialized = true;
 };
 
