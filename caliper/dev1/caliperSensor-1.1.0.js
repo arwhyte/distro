@@ -96045,11 +96045,8 @@ var options;
  */
 self.initialize = function initialize(id, options) {
   _.isNil(id) ? self.error(messages[1]) : this.id = id;
-  //_.isNil(options) ? self.error(messages[5]) : this.options = options;
-  this.options = options;
+  _.isEmpty(options) ? self.error(messages[5]) : this.options = options;
   this.initialized = true;
-
-  console.log("INIT_OPTIONS: " + options.uri);
 };
 
 /**
@@ -96089,41 +96086,38 @@ self.getOptions = function getOptions() {
  * @param envelope
  */
 self.send = function send(envelope) {
-
-  /**
   if (!self.isInitialized()) {
     self.error(messages[0]);
   }
-   if (_.isNil(envelope)) {
-   self.error(messages[3]);
-   }
-*/
+  if (_.isEmpty(envelope)) {
+    self.error(messages[3]);
+  }
 
+  // Calculate Envelope length and then stringify it.
+  var contentLength = Buffer.byteLength(envelope); // decimal number of OCTETS per RFC 2616
+  var stringEntity = self.stringify(envelope);
+
+  // Retrieve options and add Content-Length header and body.
   var opts = this.getOptions();
+  opts.headers["Content-Length"] = contentLength;
+  opts.body = stringEntity;
 
-  console.log("SEND_OPTIONS: " + opts.method);
+  logger.log('debug', "Request Options: " + JSON.stringify(opts));
 
-  // Add
-  opts.headers["Content-Length"] = Buffer.byteLength(envelope); // decimal number of OCTETS per RFC 2616
-  opts.body = self.stringify(envelope);
-
-/**
-  var opts = this.getOptions();
-  opts.headers["Content-Length"] = Buffer.byteLength(envelope); // decimal number of OCTETS per RFC 2616
-  opts.body = self.stringify(envelope);
-*/
-  console.log("Sensor Client options = " + JSON.stringify(opts));
-
+  // Issue POST
   request(opts, function (err, res, body) {
     if (err) {
-      console.error('error posting JSON: ', err);
+      //console.error('POST failed: ', err);
+      logger.log('error', "POST failed: " + err);
       throw err
     }
+
+    // Response
     var headers = res.headers;
     var statusCode = res.statusCode;
-    console.log('headers: ', headers);
-    console.log('statusCode: ', statusCode);
-    console.log('body: ', body);
+    logger.log('debug', "Response status code: " + statusCode);
+    logger.log('debug', "Response headers: " + JSON.stringify(headers));
+    logger.log('debug', "Response body: " + JSON.stringify(body));
   });
 };
 
