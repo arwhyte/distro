@@ -96151,8 +96151,7 @@ module.exports = {
   initialized: self.isInitialized,
   getId: self.getId,
   getOptions: self.getOptions,
-  postEnvelope: self.postEnvelope,
-  sendToClients: self.sendToClients
+  send: self.send
 };
 
 }).call(this,require("buffer").Buffer)
@@ -96499,8 +96498,7 @@ module.exports = {
   initialized: self.isInitialized,
   getId: self.getId,
   getOptions: self.getOptions,
-  postEnvelope: self.postEnvelope,
-  sendToClients: self.sendToClients
+  send: self.send
 };
 }).call(this,require("buffer").Buffer)
 },{"../config/config":430,"../logger":496,"./clientUtils":425,"./httpOptions":428,"buffer":104,"http":325,"https":194,"lodash":216}],427:[function(require,module,exports){
