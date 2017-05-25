@@ -96045,7 +96045,8 @@ var options = {};
  */
 self.initialize = function initialize(id, options) {
   _.isNil(id) ? self.error(messages[1]) : this.id = id;
-  _.isNil(options) ? self.error(messages[5]) : this.options = options;
+  //_.isNil(options) ? self.error(messages[5]) : this.options = options;
+  this.optons = options;
   this.initialized = true;
 };
 
@@ -96086,12 +96087,15 @@ self.getOptions = function getOptions() {
  * @param envelope
  */
 self.send = function send(envelope) {
-   if (!self.isInitialized()) {
+
+  /**
+  if (!self.isInitialized()) {
     self.error(messages[0]);
   }
    if (_.isNil(envelope)) {
    self.error(messages[3]);
    }
+*/
 
   // Retrieve options
   var opts = this.getOptions();
