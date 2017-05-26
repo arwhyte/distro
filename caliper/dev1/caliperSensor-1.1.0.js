@@ -96167,7 +96167,6 @@ module.exports = {
 
 }).call(this,require("buffer").Buffer)
 },{"../config/config":432,"../logger":498,"./clientUtils":426,"buffer":104,"lodash":216,"request":268,"url":348}],424:[function(require,module,exports){
-(function (Buffer){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -96203,20 +96202,7 @@ var client = {
     _.isEmpty(options) ? this.error(this.messages[5]) : _.assign(this.options, options);
     this.initialized = true;
   },
-  /**
-  isInitialized: function isInitialized() {
-    return this.initialized;
-  },
-  getId: function getId() {
-    return this.id;
-  },
-  getOptions: function getOptions() {
-    return this.options;
-  },
-   */
   send: function send(envelope) {
-    console.log("CLIENT_THIS_INIT: " + this.initialized);
-
     if (!this.initialized) {
       this.error(this.messages[0]);
     }
@@ -96225,8 +96211,8 @@ var client = {
     }
 
     // Calculate Envelope length and then stringify it.
-    var contentLength = Buffer.byteLength(envelope); // decimal number of OCTETS per RFC 2616
-    var stringEntity = this.stringify(envelope);
+    var contentLength = clientUtils.calculateByteLength(envelope);
+    var stringEntity = clientUtils.stringify(envelope);
 
     // Retrieve options and add Content-Length header and body.
     this.options.headers["Content-Length"] = contentLength;
@@ -96249,9 +96235,6 @@ var client = {
       logger.log('debug', "Response body: " + JSON.stringify(body));
     });
   },
-  stringify: function stringify(payload) {
-    return clientUtils.stringify(payload);
-  },
   error: function error(message) {
     throw new Error(message);
   },
@@ -96264,19 +96247,8 @@ var client = {
   ]
 };
 
-/**
-module.exports = {
-  initialize: client.initialize,
-  isInitialized: client.isInitialized,
-  getId: client.getId,
-  getOptions: client.getOptions,
-  send: client.send
-};
- */
-
 module.exports = client;
-}).call(this,require("buffer").Buffer)
-},{"../config/config":432,"../logger":498,"./clientUtils":426,"buffer":104,"lodash":216,"request":268,"url":348}],425:[function(require,module,exports){
+},{"../config/config":432,"../logger":498,"./clientUtils":426,"lodash":216,"request":268,"url":348}],425:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -96328,6 +96300,7 @@ var options = {
 
 module.exports = options;
 },{}],426:[function(require,module,exports){
+(function (Buffer){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -96365,6 +96338,15 @@ const regexCtx = /http:\/\/purl.imsglobal.org\/ctx\/caliper\/?v?[0-9]*p?[0-9]*/;
  * @constructor clientUtils
  */
 var self = this;
+
+/**
+ * Calculate the decimal number of OCTETS per RFC 2616 for HTTP header Content-Length value.
+ * @param string
+ * @returns {Number}
+ */
+self.calculateByteLength = function calculateByteLength(obj) {
+  return Buffer.byteLength(obj);
+};
 
 /**
  * Delete @context property if value corresponds to the IMS Caliper context IRI.
@@ -96452,10 +96434,12 @@ self.stringify = function stringify(obj) {
 };
 
 module.exports = {
+  calculateByteLength: self.calculateByteLength,
   parse: self.parse,
   stringify: self.stringify
 };
-},{"../validators/validator":503}],427:[function(require,module,exports){
+}).call(this,require("buffer").Buffer)
+},{"../validators/validator":503,"buffer":104}],427:[function(require,module,exports){
 (function (Buffer){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
@@ -96626,7 +96610,7 @@ module.exports = {
 arguments[4][423][0].apply(exports,arguments)
 },{"../config/config":432,"../logger":498,"./clientUtils":426,"buffer":104,"dup":423,"lodash":216,"request":268,"url":348}],429:[function(require,module,exports){
 arguments[4][424][0].apply(exports,arguments)
-},{"../config/config":432,"../logger":498,"./clientUtils":426,"buffer":104,"dup":424,"lodash":216,"request":268,"url":348}],430:[function(require,module,exports){
+},{"../config/config":432,"../logger":498,"./clientUtils":426,"dup":424,"lodash":216,"request":268,"url":348}],430:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
