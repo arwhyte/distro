@@ -96088,6 +96088,10 @@ self.getOptions = function getOptions() {
  * @param envelope
  */
 self.send = function send(envelope) {
+
+  console.log("CLIENT_THIS_INIT: " + this.initialized);
+  console.log("CLIENT_SELF_INIT: " + self.isInitialized());
+
   if (!self.isInitialized()) {
     self.error(messages[0]);
   }
