@@ -96017,308 +96017,6 @@ module.exports = actions;
  * with this program. If not, see http://www.gnu.org/licenses/.
  */
 
-var _ = require('lodash');
-var logger = require('../logger');
-var request = require('request');
-var url = require('url');
-
-var config = require('../config/config');
-var clientUtils = require('./clientUtils');
-
-/**
- * Caliper self.
- * @constructor
- * @type {{}}
- */
-var self = this;
-var id;
-var initialized = false;
-var options = {};
-
-/**
- * Initializes the default client to use.
- * Client#initialize
- * @memberof client
- * @function initialize
- * @param id client identifier
- */
-self.initialize = function initialize(id, opts) {
-  _.isNil(id) ? self.error(messages[1]) : this.id = id;
-  _.isEmpty(opts) ? self.error(messages[5]) : _.assign(options, opts);
-  this.initialized = true;
-};
-
-/**
- * Check if Client is initialized.
- * @memberof client
- * @function isInitialized
- * @returns {boolean}
- */
-self.isInitialized = function isInitialized() {
-  return this.initialized;
-};
-
-/**
- * Get the Client identifier.
- * @memberof client
- * @function getId
- * @returns {*}
- */
-self.getId = function getId() {
-  return this.id;
-};
-
-/**
- * Get Options.
- * @memberof client
- * @function getOptions
- * @returns {*}
- */
-self.getOptions = function getOptions() {
-  return this.options;
-};
-
-/**
- * Post the Envelope.
- * @memberof httpRequestor
- * @function postEnvelope
- * @param envelope
- */
-self.send = function send(envelope) {
-
-  console.log("CLIENT_THIS_INIT: " + this.initialized);
-  console.log("CLIENT_SELF_INIT: " + self.isInitialized());
-
-  if (!self.isInitialized()) {
-    self.error(messages[0]);
-  }
-  if (_.isEmpty(envelope)) {
-    self.error(messages[3]);
-  }
-
-  // Calculate Envelope length and then stringify it.
-  var contentLength = Buffer.byteLength(envelope); // decimal number of OCTETS per RFC 2616
-  var stringEntity = self.stringify(envelope);
-
-  // Retrieve options and add Content-Length header and body.
-  var opts = self.getOptions();
-  opts.headers["Content-Length"] = contentLength;
-  opts.body = stringEntity;
-
-  logger.log('debug', "Request Options: " + JSON.stringify(opts));
-
-  // Issue POST
-  request(opts, function (err, res, body) {
-    if (err) {
-      //console.error('POST failed: ', err);
-      logger.log('error', "POST failed: " + err);
-      throw err
-    }
-
-    // Response
-    var headers = res.headers;
-    var statusCode = res.statusCode;
-    logger.log('debug', "Response status code: " + statusCode);
-    logger.log('debug', "Response headers: " + JSON.stringify(headers));
-    logger.log('debug', "Response body: " + JSON.stringify(body));
-  });
-};
-
-/**
- * Stringify the payload.
- * @memberof client
- * @function stringify
- * @param payload
- * @returns {*}
- */
-self.stringify = function stringify(payload) {
-  return clientUtils.stringify(payload);
-};
-
-/**
- * Error Handler.
- * @memberof sensor
- * @function error
- * @param message
- */
-self.error = function error(message) {
-  throw new Error(message);
-};
-
-/**
- * Error messages.
- * @memberof client
- */
-var messages = [
-  "Caliper Sensor Client has not been initialized.",
-  "Caliper Sensor Client identifier (id) has not been provided.",
-  "No Requestors have been registered.",
-  "Chosen Requestor has not been registered.",
-  "No options have been provided."
-];
-
-module.exports = {
-  initialize: self.initialize,
-  isInitialized: self.isInitialized,
-  getId: self.getId,
-  getOptions: self.getOptions,
-  send: self.send
-};
-
-}).call(this,require("buffer").Buffer)
-},{"../config/config":432,"../logger":498,"./clientUtils":426,"buffer":104,"lodash":216,"request":268,"url":348}],424:[function(require,module,exports){
-/*
- * This file is part of IMS Caliper Analytics™ and is licensed to
- * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
- * under one or more contributor license agreements.  See the NOTICE
- * file distributed with this work for additional information.
- *
- * IMS Caliper is free software: you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation, version 3 of the License.
- *
- * IMS Caliper is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License along
- * with this program. If not, see http://www.gnu.org/licenses/.
- */
-
-var _ = require('lodash');
-var logger = require('../logger');
-var request = require('request');
-var url = require('url');
-
-var config = require('../config/config');
-var clientUtils = require('./clientUtils');
-
-var client = {
-  id: null,
-  initialized: false,
-  options: {},
-  initialize: function initialize(id, options) {
-    _.isNil(id) ? this.error(this.messages[1]) : this.id = id;
-    _.isEmpty(options) ? this.error(this.messages[5]) : _.assign(this.options, options);
-    this.initialized = true;
-  },
-  send: function send(envelope) {
-    if (!this.initialized) {
-      this.error(this.messages[0]);
-    }
-    if (_.isEmpty(envelope)) {
-      this.error(this.messages[3]);
-    }
-
-    // Calculate Envelope length and then stringify it.
-    var contentLength = clientUtils.calculateByteLength(envelope);
-    var stringEntity = clientUtils.stringify(envelope);
-
-    // Retrieve options and add Content-Length header and body.
-    this.options.headers["Content-Length"] = contentLength;
-    this.options.body = stringEntity;
-    logger.log('debug', "Request Options: " + JSON.stringify(this.options));
-
-    // Issue POST
-    request(this.options, function (err, res, body) {
-      if (err) {
-        //console.error('POST failed: ', err);
-        logger.log('error', "POST failed: " + err);
-        throw err
-      }
-
-      // Response
-      var headers = res.headers;
-      var statusCode = res.statusCode;
-      logger.log('debug', "Response status code: " + statusCode);
-      logger.log('debug', "Response headers: " + JSON.stringify(headers));
-      logger.log('debug', "Response body: " + JSON.stringify(body));
-    });
-  },
-  error: function error(message) {
-    throw new Error(message);
-  },
-  messages: [
-    "Caliper Sensor Client has not been initialized.",
-    "Caliper Sensor Client identifier (id) has not been provided.",
-    "No Requestors have been registered.",
-    "Chosen Requestor has not been registered.",
-    "No options have been provided."
-  ]
-};
-
-module.exports = client;
-},{"../config/config":432,"../logger":498,"./clientUtils":426,"lodash":216,"request":268,"url":348}],425:[function(require,module,exports){
-/*
- * This file is part of IMS Caliper Analytics™ and is licensed to
- * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
- * under one or more contributor license agreements.  See the NOTICE
- * file distributed with this work for additional information.
- *
- * IMS Caliper is free software: you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation, version 3 of the License.
- *
- * IMS Caliper is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License along
- * with this program. If not, see http://www.gnu.org/licenses/.
- */
-
-/**
- * Partial set of HTTP options available for use with the request module (https://www.npmjs.com/package/request)
- * uri                        <string> | <Object> fully qualified uri or a parsed url object from url.parse()
- * method                     <string> HTTP method
- * headers                    <Object> HTTP Request headers
- * headers["Authorization"]   <string> Endpoint authorization key value.
- * headers["Content-Type"]    <string> Message content type.
- * headers["Content-Length"]  <number> Message length in decimal number of OCTETs per RFC 2616
- * body                       <string> | <Buffer> | <ReadStream> Entity body of POST request. Must be a Buffer. If json
- *                            is true, then body must be a JSON-serializable object.
- * json                       <boolean> sets body to JSON representation of value and adds
- *                            Content-type: application/json header. Additionally, parses the response body as JSON.
- * jsonReplacer               <Function> a replacer function that will be passed to JSON.stringify() when
- *                            stringifying a JSON request body.
- * timeout                    <integer> the number of milliseconds to wait for a server to send response headers
- *                           (and start the response body) before aborting the request.
- */
-var options = {
-  uri: null,
-  method: "POST",
-  headers: {
-    "Authorization": null,
-    "Content-Length": null,
-    "Content-Type": "application/json"
-  },
-  body: null,
-  // json: true,
-  // jsonReplacer: null,
-  timeout: 10000
-};
-
-module.exports = options;
-},{}],426:[function(require,module,exports){
-(function (Buffer){
-/*
- * This file is part of IMS Caliper Analytics™ and is licensed to
- * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
- * under one or more contributor license agreements.  See the NOTICE
- * file distributed with this work for additional information.
- *
- * IMS Caliper is free software: you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation, version 3 of the License.
- *
- * IMS Caliper is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License along
- * with this program. If not, see http://www.gnu.org/licenses/.
- */
-
 // var logger = require('../logger');
 var validator = require('../validators/validator');
 
@@ -96439,8 +96137,7 @@ module.exports = {
   stringify: self.stringify
 };
 }).call(this,require("buffer").Buffer)
-},{"../validators/validator":503,"buffer":104}],427:[function(require,module,exports){
-(function (Buffer){
+},{"../validators/validator":497,"buffer":104}],424:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -96460,157 +96157,66 @@ module.exports = {
  */
 
 var _ = require('lodash');
-var http = require('http');
-var https = require('https');
-var config = require('../config/config');
-var options = require('./httpOptions');
-var logger = require('../logger');
+var request = require('request');
 var clientUtils = require('./clientUtils');
+var logger = require('../logger');
 
-/**
- * Caliper self.
- * @constructor
- * @type {{}}
- */
-var self = this;
-var id;
-var initialized = false;
-var options = {};
+var client = {
+  id: null,
+  initialized: false,
+  options: {},
+  initialize: function initialize(id, options) {
+    _.isNil(id) ? this.error(this.messages[1]) : this.id = id;
+    _.isEmpty(options) ? this.error(this.messages[5]) : _.assign(this.options, options);
+    this.initialized = true;
+  },
+  send: function send(envelope) {
+    if (!this.initialized) {
+      this.error(this.messages[0]);
+    }
+    if (_.isEmpty(envelope)) {
+      this.error(this.messages[3]);
+    }
 
-/**
- * Initializes the default client to use.
- * Client#initialize
- * @memberof client
- * @function initialize
- * @param id client identifier
- */
-self.initialize = function initialize(id, options) {
-  _.isNil(id) ? self.error(messages[1]) : this.id = id;
-  _.isNil(options) ? self.error(messages[5]) : this.options = options;
+    // Calculate Envelope length and then stringify it.
+    var contentLength = clientUtils.calculateByteLength(envelope);
+    var stringEntity = clientUtils.stringify(envelope);
 
-  //this.options = options;
+    // Retrieve options and add Content-Length header and body.
+    this.options.headers["Content-Length"] = contentLength;
+    this.options.body = stringEntity;
+    logger.log('debug', "Request Options: " + JSON.stringify(this.options));
 
-  this.initialized = true;
+    // Issue POST
+    request(this.options, function (err, res, body) {
+      if (err) {
+        //console.error('POST failed: ', err);
+        logger.log('error', "POST failed: " + err);
+        throw err
+      }
+
+      // Response
+      var headers = res.headers;
+      var statusCode = res.statusCode;
+      logger.log('debug', "Response status code: " + statusCode);
+      logger.log('debug', "Response headers: " + JSON.stringify(headers));
+      logger.log('debug', "Response body: " + JSON.stringify(body));
+    });
+  },
+  error: function error(message) {
+    throw new Error(message);
+  },
+  messages: [
+    "Caliper Sensor Client has not been initialized.",
+    "Caliper Sensor Client identifier (id) has not been provided.",
+    "No Requestors have been registered.",
+    "Chosen Requestor has not been registered.",
+    "No options have been provided."
+  ]
 };
 
-/**
- * Check if Client is initialized.
- * @memberof client
- * @function isInitialized
- * @returns {boolean}
- */
-self.isInitialized = function isInitialized() {
-  return this.initialized;
-};
-
-/**
- * Get the Client identifier.
- * @memberof client
- * @function getId
- * @returns {*}
- */
-self.getId = function getId() {
-  return this.id;
-};
-
-/**
- * Get Options.
- * @memberof client
- * @function getOptions
- * @returns {*}
- */
-self.getOptions = function getOptions() {
-  return this.options;
-};
-
-/**
- * Post the Envelope.
- * @memberof httpRequestor
- * @function postEnvelope
- * @param envelope
- */
-self.send = function send(envelope) {
-  /**
-   if (!self.isInitialized()) {
-    self.error(messages[0]);
-  }
-   */
-
-  /*
-   if (_.isNil(envelope)) {
-   self.error(messages[3]);
-   }
-   */
-
-  // Retrieve options
-  var opts = this.getOptions();
-  opts.headers["Content-Length"] = Buffer.byteLength(envelope); // decimal number of OCTETS per RFC 2616
-
-  console.log("Sensor Client options = " + JSON.stringify(opts));
-
-  // Stringify the envelope
-  var payload = self.stringify(envelope);
-
-  logger.log('debug', "Sending data " + JSON.stringify(envelope));
-
-  // Create request
-  var request = http.request(opts, function (response) {
-    logger.log('debug', "Response received = " + JSON.stringify(response));
-  }, function(error){
-    logger.log('error', "ERROR sending event = " + error);
-  });
-
-  // Write request
-  request.write(payload);
-  request.end();
-};
-
-/**
- * Stringify the payload.
- * @memberof client
- * @function stringify
- * @param payload
- * @returns {*}
- */
-self.stringify = function stringify(payload) {
-  return clientUtils.stringify(payload);
-};
-
-/**
- * Error Handler.
- * @memberof sensor
- * @function error
- * @param message
- */
-self.error = function error(message) {
-  throw new Error(message);
-};
-
-/**
- * Error messages.
- * @memberof client
- */
-var messages = [
-  "Caliper Sensor Client has not been initialized.",
-  "Caliper Sensor Client identifier (id) has not been provided.",
-  "No Requestors have been registered.",
-  "Chosen Requestor has not been registered.",
-  "No options have been provided."
-];
-
-module.exports = {
-  initialize: self.initialize,
-  isInitialized: self.isInitialized,
-  getId: self.getId,
-  getOptions: self.getOptions,
-  send: self.send
-};
-}).call(this,require("buffer").Buffer)
-},{"../config/config":432,"../logger":498,"./clientUtils":426,"./httpOptions":430,"buffer":104,"http":325,"https":194,"lodash":216}],428:[function(require,module,exports){
-arguments[4][423][0].apply(exports,arguments)
-},{"../config/config":432,"../logger":498,"./clientUtils":426,"buffer":104,"dup":423,"lodash":216,"request":268,"url":348}],429:[function(require,module,exports){
-arguments[4][424][0].apply(exports,arguments)
-},{"../config/config":432,"../logger":498,"./clientUtils":426,"dup":424,"lodash":216,"request":268,"url":348}],430:[function(require,module,exports){
+module.exports = client;
+},{"../logger":492,"./clientUtils":423,"lodash":216,"request":268}],425:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -96630,57 +96236,36 @@ arguments[4][424][0].apply(exports,arguments)
  */
 
 /**
- * Default HTTP options
- * agent                      <http.Agent> | <boolean> Controls Agent behavior. Possible values:
- *                              undefined (default): use http.globalAgent for this host and port.
- *                              Agent object: explicitly use the passed in Agent.
- *                              false: causes a new Agent with default values to be used.
- * auth                       <string> Basic authentication i.e. 'user:password' to compute an Authorization header.
- * createConnection           <Function> A function that produces a socket/stream to use for the request when the
- *                              agent option is not used. This can be used to avoid creating a custom Agent class
- *                              just to override the default createConnection function. See Node HTTP
- *                              agent.createConnection() for more details.
- * family                     <number> IP address family to use when resolving host and hostname. Valid values are
- *                              4 or 6.  When unspecified, both IP v4 and v6 will be used.
- * headers                    <Object> Request headers
- * headers.Authorization:     <string> Endpoint authorization key value.
- * headers["Content-Type"]:   <string> Message content type.
- * headers["Content-Length"]: <number> Message length in decimal number of OCTETs per RFC 2616
- * hostname:                  <string> Alias for host. To support Node HTTP module url.parse(), hostname is preferred
- *                              over host.
- * localAddress:              <string> Local interface to bind for network connections.
- * method:                    <string> Specifies the HTTP Request method.
- * path:                      <string> Request Path.
- * port:                      <number> Port of remote server.
- * protocol:                  <string> Protocol to use.
- * socketPath:                <string> Unix Domain Socket (use one of host:port or socketPath).
- * timeOut:                   <number> A number specifying the socket timeout in milliseconds. This will set the
- *                              timeout before the socket is connected.
+ * Partial set of HTTP options available for use with the request module (https://www.npmjs.com/package/request)
+ * uri                        <string> | <Object> fully qualified uri or a parsed url object from url.parse()
+ * method                     <string> HTTP method
+ * headers                    <Object> HTTP Request headers
+ * headers["Authorization"]   <string> Endpoint authorization key value.
+ * headers["Content-Type"]    <string> Message content type.
+ * headers["Content-Length"]  <number> Message length in decimal number of OCTETs per RFC 2616
+ * body                       <string> | <Buffer> | <ReadStream> Entity body of POST request. Must be a Buffer. If json
+ *                            is true, then body must be a JSON-serializable object.
+ * json                       <boolean> sets body to JSON representation of value and adds
+ *                            Content-type: application/json header. Additionally, parses the response body as JSON.
+ * jsonReplacer               <Function> a replacer function that will be passed to JSON.stringify() when
+ *                            stringifying a JSON request body.
+ * timeout                    <integer> the number of milliseconds to wait for a server to send response headers
+ *                           (and start the response body) before aborting the request.
  */
-var options = [{
-  agent: null,
-  auth: null,
-  createConnection: null,
-  family: null,
+var options = {
+  uri: null,
+  method: "POST",
   headers: {
     "Authorization": null,
     "Content-Length": null,
     "Content-Type": "application/json"
   },
-  host: null,
-  localAddress: null,
-  method: "POST",
-  path: "/",
-  port: 80,
-  protocol: "http:",
-  socketPath: null,
-  timeOut: 10000
-}];
+  body: null,
+  timeout: 10000
+};
 
 module.exports = options;
-},{}],431:[function(require,module,exports){
-arguments[4][425][0].apply(exports,arguments)
-},{"dup":425}],432:[function(require,module,exports){
+},{}],426:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -96716,7 +96301,7 @@ var Config = {
 };
 
 module.exports = Config;
-},{}],433:[function(require,module,exports){
+},{}],427:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -96745,7 +96330,7 @@ var entityType = require('../entityType');
 var Agent = _.assign({}, entity, {type: entityType.agent.term});
 
 module.exports = Agent;
-},{"../entity":448,"../entityType":450,"lodash":216}],434:[function(require,module,exports){
+},{"../entity":442,"../entityType":444,"lodash":216}],428:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -96778,7 +96363,7 @@ var CourseOffering = _.assign({}, organization, {
 });
 
 module.exports = CourseOffering;
-},{"../entityType":450,"./organization":438,"lodash":216}],435:[function(require,module,exports){
+},{"../entityType":444,"./organization":432,"lodash":216}],429:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -96807,7 +96392,7 @@ var entityType = require('../entityType');
 var CourseSection = _.assign({}, courseOffering, {type: entityType.courseSection.term, category: null});
 
 module.exports = CourseSection;
-},{"../entityType":450,"./courseOffering":434,"lodash":216}],436:[function(require,module,exports){
+},{"../entityType":444,"./courseOffering":428,"lodash":216}],430:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -96836,7 +96421,7 @@ var entityType = require('../entityType');
 var Group = _.assign({}, organization, {type: entityType.group.term});
 
 module.exports = Group;
-},{"../entityType":450,"./organization":438,"lodash":216}],437:[function(require,module,exports){
+},{"../entityType":444,"./organization":432,"lodash":216}],431:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -96871,7 +96456,7 @@ var Membership = _.assign({}, entity, {
 });
 
 module.exports = Membership;
-},{"../entity":448,"../entityType":450,"lodash":216}],438:[function(require,module,exports){
+},{"../entity":442,"../entityType":444,"lodash":216}],432:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -96900,7 +96485,7 @@ var entityType = require('../entityType');
 var Organization = _.assign({}, agent, {type: entityType.organization.term, subOrganizationOf: {}, members: []});
 
 module.exports = Organization;
-},{"../entityType":450,"./agent":433,"lodash":216}],439:[function(require,module,exports){
+},{"../entityType":444,"./agent":427,"lodash":216}],433:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -96929,7 +96514,7 @@ var entityType = require('../entityType');
 var Person = _.assign({}, agent, {type: entityType.person.term});
 
 module.exports = Person;
-},{"../entityType":450,"./agent":433,"lodash":216}],440:[function(require,module,exports){
+},{"../entityType":444,"./agent":427,"lodash":216}],434:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97014,7 +96599,7 @@ var role = {
 };
 
 module.exports = role;
-},{}],441:[function(require,module,exports){
+},{}],435:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97043,7 +96628,7 @@ var entityType = require('../entityType');
 var SoftwareApplication = _.assign({}, agent, {type: entityType.softwareApplication.term, version: null});
 
 module.exports = SoftwareApplication;
-},{"../entityType":450,"./agent":433,"lodash":216}],442:[function(require,module,exports){
+},{"../entityType":444,"./agent":427,"lodash":216}],436:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97068,7 +96653,7 @@ var status =  {
 };
 
 module.exports = status;
-},{}],443:[function(require,module,exports){
+},{}],437:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97097,7 +96682,7 @@ var entityType = require('../entityType');
 var Annotation = _.assign({}, entity, {type: entityType.annotation.term, annotator: {}, annotated: {}});
 
 module.exports = Annotation;
-},{"../entity":448,"../entityType":450,"lodash":216}],444:[function(require,module,exports){
+},{"../entity":442,"../entityType":444,"lodash":216}],438:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97126,7 +96711,7 @@ var entityType = require('../entityType');
 var BookmarkAnnotation = _.assign({}, annotation, {type: entityType.bookmarkAnnotation.term, bookmarkNotes: null});
 
 module.exports = BookmarkAnnotation;
-},{"../entityType":450,"./annotation":443,"lodash":216}],445:[function(require,module,exports){
+},{"../entityType":444,"./annotation":437,"lodash":216}],439:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97159,7 +96744,7 @@ var HighlightAnnotation = _.assign({}, annotation, {
 });
 
 module.exports = HighlightAnnotation;
-},{"../entityType":450,"./annotation":443,"lodash":216}],446:[function(require,module,exports){
+},{"../entityType":444,"./annotation":437,"lodash":216}],440:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97188,7 +96773,7 @@ var entityType = require('../entityType');
 var SharedAnnotation = _.assign({}, annotation, {type: entityType.sharedAnnotation.term, withAgents: []});
 
 module.exports = SharedAnnotation;
-},{"../entityType":450,"./annotation":443,"lodash":216}],447:[function(require,module,exports){
+},{"../entityType":444,"./annotation":437,"lodash":216}],441:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97217,7 +96802,7 @@ var entityType = require('../entityType');
 var TagAnnotation = _.assign({}, annotation, {type: entityType.tagAnnotation.term, tags: []});
 
 module.exports = TagAnnotation;
-},{"../entityType":450,"./annotation":443,"lodash":216}],448:[function(require,module,exports){
+},{"../entityType":444,"./annotation":437,"lodash":216}],442:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97265,7 +96850,7 @@ var createEntity = function createEntity() {
 var entity = createEntity();
 
 module.exports = entity;
-},{"../config/config":432,"./entityType":450,"lodash":216}],449:[function(require,module,exports){
+},{"../config/config":426,"./entityType":444,"lodash":216}],443:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97323,7 +96908,7 @@ var entityFactory = function entityFactory() {
 };
 
 module.exports = entityFactory;
-},{"../validators/entityValidator":501,"../validators/validator":503,"./entity":448,"lodash":216}],450:[function(require,module,exports){
+},{"../validators/entityValidator":495,"../validators/validator":497,"./entity":442,"lodash":216}],444:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97389,7 +96974,7 @@ var entityType = {
 };
 
 module.exports = entityType;
-},{}],451:[function(require,module,exports){
+},{}],445:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97429,7 +97014,7 @@ var Result = _.assign({}, entity, {
 });
 
 module.exports = Result;
-},{"../entity":448,"../entityType":450,"lodash":216}],452:[function(require,module,exports){
+},{"../entity":442,"../entityType":444,"lodash":216}],446:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97459,7 +97044,7 @@ var entityType = require('../entityType');
 var Assessment = _.assign({}, collection, assignable, {type: entityType.assessment.term});
 
 module.exports = Assessment;
-},{"../entityType":450,"./assignableDigitalResource":454,"./digitalResourceCollection":459,"lodash":216}],453:[function(require,module,exports){
+},{"../entityType":444,"./assignableDigitalResource":448,"./digitalResourceCollection":453,"lodash":216}],447:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97488,7 +97073,7 @@ var entityType = require('../entityType');
 var AssessmentItem = _.assign({}, assignable, {type: entityType.assessmentItem.term, isTimeDependent: null});
 
 module.exports = AssessmentItem;
-},{"../entityType":450,"./assignableDigitalResource":454,"lodash":216}],454:[function(require,module,exports){
+},{"../entityType":444,"./assignableDigitalResource":448,"lodash":216}],448:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97526,7 +97111,7 @@ var AssignableDigitalResource = _.assign({}, digitalResource, {
 });
 
 module.exports = AssignableDigitalResource;
-},{"../entityType":450,"./digitalResource":458,"lodash":216}],455:[function(require,module,exports){
+},{"../entityType":444,"./digitalResource":452,"lodash":216}],449:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97564,7 +97149,7 @@ var Attempt = _.assign({}, entity, {
 });
 
 module.exports = Attempt;
-},{"../entity":448,"../entityType":450,"lodash":216}],456:[function(require,module,exports){
+},{"../entity":442,"../entityType":444,"lodash":216}],450:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97599,7 +97184,7 @@ var AudioObject = _.assign({}, mediaObject, {
 });
 
 module.exports = AudioObject;
-},{"../entityType":450,"./mediaObject":466,"lodash":216}],457:[function(require,module,exports){
+},{"../entityType":444,"./mediaObject":460,"lodash":216}],451:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97628,7 +97213,7 @@ var entityType = require('../entityType');
 var Chapter = _.assign({}, digitalResource, {type: entityType.chapter.term});
 
 module.exports = Chapter;
-},{"../entityType":450,"./digitalResource":458,"lodash":216}],458:[function(require,module,exports){
+},{"../entityType":444,"./digitalResource":452,"lodash":216}],452:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97666,7 +97251,7 @@ var DigitalResource = _.assign({}, entity, {
 });
 
 module.exports = DigitalResource;
-},{"../entity":448,"../entityType":450,"lodash":216}],459:[function(require,module,exports){
+},{"../entity":442,"../entityType":444,"lodash":216}],453:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97698,7 +97283,7 @@ var DigitalResourceCollection = _.assign({}, digitalResource, {
 });
 
 module.exports = DigitalResourceCollection;
-},{"../entityType":450,"./digitalResource":458,"lodash":216}],460:[function(require,module,exports){
+},{"../entityType":444,"./digitalResource":452,"lodash":216}],454:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97727,7 +97312,7 @@ var entityType = require('../entityType');
 var Document = _.assign({}, digitalResource, {type: entityType.document.term});
 
 module.exports = Document;
-},{"../entityType":450,"./digitalResource":458,"lodash":216}],461:[function(require,module,exports){
+},{"../entityType":444,"./digitalResource":452,"lodash":216}],455:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97756,7 +97341,7 @@ var entityType = require('../entityType');
 var Forum = _.assign({}, collection, {type: entityType.forum.term});
 
 module.exports = Forum;
-},{"../entityType":450,"./digitalResourceCollection":459,"lodash":216}],462:[function(require,module,exports){
+},{"../entityType":444,"./digitalResourceCollection":453,"lodash":216}],456:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97785,7 +97370,7 @@ var entityType = require('../entityType');
 var Frame = _.assign({}, digitalResource, {type: entityType.frame.term, index: null});
 
 module.exports = Frame;
-},{"../entityType":450,"./digitalResource":458,"lodash":216}],463:[function(require,module,exports){
+},{"../entityType":444,"./digitalResource":452,"lodash":216}],457:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97814,7 +97399,7 @@ var entityType = require('../entityType');
 var ImageObject = _.assign({}, mediaObject, {type: entityType.imageObject.term});
 
 module.exports = ImageObject;
-},{"../entityType":450,"./mediaObject":466,"lodash":216}],464:[function(require,module,exports){
+},{"../entityType":444,"./mediaObject":460,"lodash":216}],458:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97843,7 +97428,7 @@ var entityType = require('../entityType');
 var LearningObjective = _.assign({}, entity, {type: entityType.learningObjective.term});
 
 module.exports = LearningObjective;
-},{"../entity":448,"../entityType":450,"lodash":216}],465:[function(require,module,exports){
+},{"../entity":442,"../entityType":444,"lodash":216}],459:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97872,7 +97457,7 @@ var entityType = require('../entityType');
 var MediaLocation = _.assign({}, digitalResource, {type: entityType.mediaLocation.term, currentTime: null});
 
 module.exports = MediaLocation;
-},{"../entityType":450,"./digitalResource":458,"lodash":216}],466:[function(require,module,exports){
+},{"../entityType":444,"./digitalResource":452,"lodash":216}],460:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97901,7 +97486,7 @@ var entityType = require('../entityType');
 var MediaObject = _.assign({}, digitalResource, {type: entityType.mediaObject.term, duration: null});
 
 module.exports = MediaObject;
-},{"../entityType":450,"./digitalResource":458,"lodash":216}],467:[function(require,module,exports){
+},{"../entityType":444,"./digitalResource":452,"lodash":216}],461:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97934,7 +97519,7 @@ var Message = _.assign({}, digitalResource, {
   attachments: [] });
 
 module.exports = Message;
-},{"../entityType":450,"./digitalResource":458,"lodash":216}],468:[function(require,module,exports){
+},{"../entityType":444,"./digitalResource":452,"lodash":216}],462:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97963,7 +97548,7 @@ var entityType = require('../entityType');
 var Page = _.assign({}, digitalResource, {type: entityType.page.term});
 
 module.exports = Page;
-},{"../entityType":450,"./digitalResource":458,"lodash":216}],469:[function(require,module,exports){
+},{"../entityType":444,"./digitalResource":452,"lodash":216}],463:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -97992,7 +97577,7 @@ var entityType = require('../entityType');
 var Thread = _.assign({}, collection, {type: entityType.thread.term});
 
 module.exports = Thread;
-},{"../entityType":450,"./digitalResourceCollection":459,"lodash":216}],470:[function(require,module,exports){
+},{"../entityType":444,"./digitalResourceCollection":453,"lodash":216}],464:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98021,7 +97606,7 @@ var entityType = require('../entityType');
 var VideoObject = _.assign({}, mediaObject, {type: entityType.videoObject.term});
 
 module.exports = VideoObject;
-},{"../entityType":450,"./mediaObject":466,"lodash":216}],471:[function(require,module,exports){
+},{"../entityType":444,"./mediaObject":460,"lodash":216}],465:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98050,7 +97635,7 @@ var entityType = require('../entityType');
 var WebPage = _.assign({}, digitalResource, {type: entityType.webPage.term});
 
 module.exports = WebPage;
-},{"../entityType":450,"./digitalResource":458,"lodash":216}],472:[function(require,module,exports){
+},{"../entityType":444,"./digitalResource":452,"lodash":216}],466:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98079,7 +97664,7 @@ var entityType = require('../entityType');
 var FillinBlankResponse = _.assign({}, response, {type: entityType.fillinBlankResponse.term, values: []});
 
 module.exports = FillinBlankResponse;
-},{"../entityType":450,"./response":475,"lodash":216}],473:[function(require,module,exports){
+},{"../entityType":444,"./response":469,"lodash":216}],467:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98108,7 +97693,7 @@ var entityType = require('../entityType');
 var MultipleChoiceResponse = _.assign({}, response, {type: entityType.multipleChoiceResponse.term, value: null});
 
 module.exports = MultipleChoiceResponse;
-},{"../entityType":450,"./response":475,"lodash":216}],474:[function(require,module,exports){
+},{"../entityType":444,"./response":469,"lodash":216}],468:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98137,7 +97722,7 @@ var entityType = require('../entityType');
 var MultipleResponseResponse = _.assign({}, response, {type: entityType.multipleResponseResponse.term, values: []});
 
 module.exports = MultipleResponseResponse;
-},{"../entityType":450,"./response":475,"lodash":216}],475:[function(require,module,exports){
+},{"../entityType":444,"./response":469,"lodash":216}],469:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98174,7 +97759,7 @@ var Response = _.assign({}, entity, {
 });
 
 module.exports = Response;
-},{"../entity":448,"../entityType":450,"lodash":216}],476:[function(require,module,exports){
+},{"../entity":442,"../entityType":444,"lodash":216}],470:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98203,7 +97788,7 @@ var entityType = require('../entityType');
 var SelectTextResponse = _.assign({}, response, {type: entityType.selectTextResponse.term, values: []});
 
 module.exports = SelectTextResponse;
-},{"../entityType":450,"./response":475,"lodash":216}],477:[function(require,module,exports){
+},{"../entityType":444,"./response":469,"lodash":216}],471:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98232,7 +97817,7 @@ var entityType = require('../entityType');
 var TrueFalseResponse = _.assign({}, response, {type: entityType.trueFalseResponse.term, value: null});
 
 module.exports = TrueFalseResponse;
-},{"../entityType":450,"./response":475,"lodash":216}],478:[function(require,module,exports){
+},{"../entityType":444,"./response":469,"lodash":216}],472:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98261,7 +97846,7 @@ var entityType = require('../entityType');
 var LtiSession = _.assign({}, session, {type: entityType.ltiSession.term, launchParameters: {}});
 
 module.exports = LtiSession;
-},{"../entityType":450,"./session":479,"lodash":216}],479:[function(require,module,exports){
+},{"../entityType":444,"./session":473,"lodash":216}],473:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98296,7 +97881,7 @@ var Session = _.assign({}, entity, {
 });
 
 module.exports = Session;
-},{"../entity":448,"../entityType":450,"lodash":216}],480:[function(require,module,exports){
+},{"../entity":442,"../entityType":444,"lodash":216}],474:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98347,7 +97932,7 @@ var envelope = createEnvelope();
 module.exports = envelope;
 
 
-},{"./config/config":432,"lodash":216,"moment":222}],481:[function(require,module,exports){
+},{"./config/config":426,"lodash":216,"moment":222}],475:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98376,7 +97961,7 @@ var eventType = require('./eventType');
 var AnnotationEvent = _.assign({}, event, {type: eventType.annotation.term});
 
 module.exports = AnnotationEvent;
-},{"./event":485,"./eventType":487,"lodash":216}],482:[function(require,module,exports){
+},{"./event":479,"./eventType":481,"lodash":216}],476:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98405,7 +97990,7 @@ var eventType = require('./eventType');
 var AssessmentEvent = _.assign({}, event, {type: eventType.assessment.term});
 
 module.exports = AssessmentEvent;
-},{"./event":485,"./eventType":487,"lodash":216}],483:[function(require,module,exports){
+},{"./event":479,"./eventType":481,"lodash":216}],477:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98434,7 +98019,7 @@ var eventType = require('./eventType');
 var AssessmentItemEvent = _.assign({}, event, {type: eventType.assessmentItem.term});
 
 module.exports = AssessmentItemEvent;
-},{"./event":485,"./eventType":487,"lodash":216}],484:[function(require,module,exports){
+},{"./event":479,"./eventType":481,"lodash":216}],478:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98463,7 +98048,7 @@ var eventType = require('./eventType');
 var AssignableEvent = _.assign({}, event, {type: eventType.assignable.term});
 
 module.exports = AssignableEvent;
-},{"./event":485,"./eventType":487,"lodash":216}],485:[function(require,module,exports){
+},{"./event":479,"./eventType":481,"lodash":216}],479:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98519,7 +98104,7 @@ var createEvent = function createEvent() {
 var event = createEvent();
 
 module.exports = event;
-},{"../config/config":432,"./eventType":487,"lodash":216}],486:[function(require,module,exports){
+},{"../config/config":426,"./eventType":481,"lodash":216}],480:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98566,7 +98151,7 @@ var eventFactory = function eventFactory() {
 };
 
 module.exports = eventFactory;
-},{"../validators/eventValidator":502,"./event":485,"lodash":216}],487:[function(require,module,exports){
+},{"../validators/eventValidator":496,"./event":479,"lodash":216}],481:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98666,7 +98251,7 @@ var eventType = {
 };
 
 module.exports = eventType;
-},{}],488:[function(require,module,exports){
+},{}],482:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98695,7 +98280,7 @@ var eventType = require('./eventType');
 var ForumEvent = _.assign({}, event, {type: eventType.forum.term});
 
 module.exports = ForumEvent;
-},{"./event":485,"./eventType":487,"lodash":216}],489:[function(require,module,exports){
+},{"./event":479,"./eventType":481,"lodash":216}],483:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98724,7 +98309,7 @@ var eventType = require('./eventType');
 var MediaEvent = _.assign({}, event, {type: eventType.media.term});
 
 module.exports = MediaEvent;
-},{"./event":485,"./eventType":487,"lodash":216}],490:[function(require,module,exports){
+},{"./event":479,"./eventType":481,"lodash":216}],484:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98753,7 +98338,7 @@ var eventType = require('./eventType');
 var MessageEvent = _.assign({}, event, {type: eventType.message.term});
 
 module.exports = MessageEvent;
-},{"./event":485,"./eventType":487,"lodash":216}],491:[function(require,module,exports){
+},{"./event":479,"./eventType":481,"lodash":216}],485:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98782,7 +98367,7 @@ var eventType = require('./eventType');
 var NavigationEvent = _.assign({}, event, {type: eventType.navigation.term});
 
 module.exports = NavigationEvent;
-},{"./event":485,"./eventType":487,"lodash":216}],492:[function(require,module,exports){
+},{"./event":479,"./eventType":481,"lodash":216}],486:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98811,7 +98396,7 @@ var eventType = require('./eventType');
 var OutcomeEvent = _.assign({}, event, {type: eventType.outcome.term});
 
 module.exports = OutcomeEvent;
-},{"./event":485,"./eventType":487,"lodash":216}],493:[function(require,module,exports){
+},{"./event":479,"./eventType":481,"lodash":216}],487:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98841,7 +98426,7 @@ var eventType = require('./eventType');
 var ReadingEvent = _.assign({}, event, {type: eventType.reading.term});
 
 module.exports = ReadingEvent;
-},{"./event":485,"./eventType":487,"lodash":216}],494:[function(require,module,exports){
+},{"./event":479,"./eventType":481,"lodash":216}],488:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98870,7 +98455,7 @@ var eventType = require('./eventType');
 var SessionEvent = _.assign({}, event, {type: eventType.session.term});
 
 module.exports = SessionEvent;
-},{"./event":485,"./eventType":487,"lodash":216}],495:[function(require,module,exports){
+},{"./event":479,"./eventType":481,"lodash":216}],489:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98900,7 +98485,7 @@ var ThreadEvent = _.assign({}, event, {type: eventType.thread.term});
 
 module.exports = ThreadEvent;
 
-},{"./event":485,"./eventType":487,"lodash":216}],496:[function(require,module,exports){
+},{"./event":479,"./eventType":481,"lodash":216}],490:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98929,7 +98514,7 @@ var eventType = require('./eventType');
 var ToolUseEvent = _.assign({}, event, {type: eventType.toolUse.term});
 
 module.exports = ToolUseEvent;
-},{"./event":485,"./eventType":487,"lodash":216}],497:[function(require,module,exports){
+},{"./event":479,"./eventType":481,"lodash":216}],491:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -98958,7 +98543,7 @@ var eventType = require('./eventType');
 var ViewEvent = _.assign({}, event, {type: eventType.view.term});
 
 module.exports = ViewEvent;
-},{"./event":485,"./eventType":487,"lodash":216}],498:[function(require,module,exports){
+},{"./event":479,"./eventType":481,"lodash":216}],492:[function(require,module,exports){
 (function (process){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
@@ -98999,7 +98584,7 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"_process":245,"caterpillar":109,"caterpillar-filter":107,"caterpillar-human":108,"fs":101}],499:[function(require,module,exports){
+},{"_process":245,"caterpillar":109,"caterpillar-filter":107,"caterpillar-human":108,"fs":101}],493:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -99029,7 +98614,7 @@ var _ = require('lodash');
 var textPositionSelector = {type: "TextPositionSelector", start: null, end: null};
 
 module.exports = textPositionSelector;
-},{"lodash":216}],500:[function(require,module,exports){
+},{"lodash":216}],494:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -99351,14 +98936,9 @@ Caliper.Events.ViewEvent                   = require('./events/viewEvent');
 Caliper.Selectors.TextPositionSelector     = require('./selectors/textPositionSelector');
 
 // Sensor clients
-Caliper.Clients.ClientUtils          = require('./clients/clientUtils');
-Caliper.Clients.HttpClient           = require('./clients/httpClient');
-Caliper.Config.Options                = require('./clients/httpOptions');
-
-// Temp
-Caliper.Clients.HttpClientRequest          = require('./clients/httpClientRequest');
-Caliper.Clients.HttpClientRequest2         = require('./clients/httpClientRequest2');
-Caliper.Clients.HttpRequestOptions         = require('./clients/httpRequestOptions');
+Caliper.Clients.ClientUtils                = require('./clients/clientUtils');
+Caliper.Clients.HttpClient                 = require('./clients/httpClient');
+Caliper.Clients.HttpOptions                = require('./clients/httpOptions');
 
 // Validators
 Caliper.Validators.Validator               = require('./validators/validator');
@@ -99375,7 +98955,7 @@ if (typeof window !== 'undefined') {
 } else {
   module.exports = Caliper
 }
-},{"./actions/actions":422,"./clients/clientUtils":426,"./clients/httpClient":427,"./clients/httpClientRequest":428,"./clients/httpClientRequest2":429,"./clients/httpOptions":430,"./clients/httpRequestOptions":431,"./config/config":432,"./entities/agent/agent":433,"./entities/agent/courseOffering":434,"./entities/agent/courseSection":435,"./entities/agent/group":436,"./entities/agent/membership":437,"./entities/agent/organization":438,"./entities/agent/person":439,"./entities/agent/role":440,"./entities/agent/softwareApplication":441,"./entities/agent/status":442,"./entities/annotation/annotation":443,"./entities/annotation/bookmarkAnnotation":444,"./entities/annotation/highlightAnnotation":445,"./entities/annotation/sharedAnnotation":446,"./entities/annotation/tagAnnotation":447,"./entities/entity":448,"./entities/entityFactory":449,"./entities/entityType":450,"./entities/outcome/result":451,"./entities/resource/assessment":452,"./entities/resource/assessmentItem":453,"./entities/resource/assignableDigitalResource":454,"./entities/resource/attempt":455,"./entities/resource/audioObject":456,"./entities/resource/chapter":457,"./entities/resource/digitalResource":458,"./entities/resource/digitalResourceCollection":459,"./entities/resource/document":460,"./entities/resource/forum":461,"./entities/resource/frame":462,"./entities/resource/imageObject":463,"./entities/resource/learningObjective":464,"./entities/resource/mediaLocation":465,"./entities/resource/mediaObject":466,"./entities/resource/message":467,"./entities/resource/page":468,"./entities/resource/thread":469,"./entities/resource/videoObject":470,"./entities/resource/webPage":471,"./entities/response/fillinBlankResponse":472,"./entities/response/multipleChoiceResponse":473,"./entities/response/multipleResponseResponse":474,"./entities/response/response":475,"./entities/response/selectTextResponse":476,"./entities/response/trueFalseResponse":477,"./entities/session/ltiSession":478,"./entities/session/session":479,"./envelope":480,"./events/annotationEvent":481,"./events/assessmentEvent":482,"./events/assessmentItemEvent":483,"./events/assignableEvent":484,"./events/event":485,"./events/eventFactory":486,"./events/eventType":487,"./events/forumEvent":488,"./events/mediaEvent":489,"./events/messageEvent":490,"./events/navigationEvent":491,"./events/outcomeEvent":492,"./events/sessionEvent":494,"./events/threadEvent":495,"./events/toolUseEvent":496,"./events/viewEvent":497,"./logger":498,"./selectors/textPositionSelector":499,"./validators/entityValidator":501,"./validators/eventValidator":502,"./validators/validator":503,"hashmap":187,"lodash":216,"moment":222}],501:[function(require,module,exports){
+},{"./actions/actions":422,"./clients/clientUtils":423,"./clients/httpClient":424,"./clients/httpOptions":425,"./config/config":426,"./entities/agent/agent":427,"./entities/agent/courseOffering":428,"./entities/agent/courseSection":429,"./entities/agent/group":430,"./entities/agent/membership":431,"./entities/agent/organization":432,"./entities/agent/person":433,"./entities/agent/role":434,"./entities/agent/softwareApplication":435,"./entities/agent/status":436,"./entities/annotation/annotation":437,"./entities/annotation/bookmarkAnnotation":438,"./entities/annotation/highlightAnnotation":439,"./entities/annotation/sharedAnnotation":440,"./entities/annotation/tagAnnotation":441,"./entities/entity":442,"./entities/entityFactory":443,"./entities/entityType":444,"./entities/outcome/result":445,"./entities/resource/assessment":446,"./entities/resource/assessmentItem":447,"./entities/resource/assignableDigitalResource":448,"./entities/resource/attempt":449,"./entities/resource/audioObject":450,"./entities/resource/chapter":451,"./entities/resource/digitalResource":452,"./entities/resource/digitalResourceCollection":453,"./entities/resource/document":454,"./entities/resource/forum":455,"./entities/resource/frame":456,"./entities/resource/imageObject":457,"./entities/resource/learningObjective":458,"./entities/resource/mediaLocation":459,"./entities/resource/mediaObject":460,"./entities/resource/message":461,"./entities/resource/page":462,"./entities/resource/thread":463,"./entities/resource/videoObject":464,"./entities/resource/webPage":465,"./entities/response/fillinBlankResponse":466,"./entities/response/multipleChoiceResponse":467,"./entities/response/multipleResponseResponse":468,"./entities/response/response":469,"./entities/response/selectTextResponse":470,"./entities/response/trueFalseResponse":471,"./entities/session/ltiSession":472,"./entities/session/session":473,"./envelope":474,"./events/annotationEvent":475,"./events/assessmentEvent":476,"./events/assessmentItemEvent":477,"./events/assignableEvent":478,"./events/event":479,"./events/eventFactory":480,"./events/eventType":481,"./events/forumEvent":482,"./events/mediaEvent":483,"./events/messageEvent":484,"./events/navigationEvent":485,"./events/outcomeEvent":486,"./events/sessionEvent":488,"./events/threadEvent":489,"./events/toolUseEvent":490,"./events/viewEvent":491,"./logger":492,"./selectors/textPositionSelector":493,"./validators/entityValidator":495,"./validators/eventValidator":496,"./validators/validator":497,"hashmap":187,"lodash":216,"moment":222}],495:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -99424,7 +99004,7 @@ module.exports.checkOpts = function opts(delegate, opts) {
   });
   return opts;
 };
-},{"./validator":503}],502:[function(require,module,exports){
+},{"./validator":497}],496:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -99498,7 +99078,7 @@ module.exports.checkOpts = function opts(delegate, opts) {
   });
   return opts;
 };
-},{"../config/config":432,"./validator":503}],503:[function(require,module,exports){
+},{"../config/config":426,"./validator":497}],497:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -99774,4 +99354,4 @@ module.exports.moveToExtensions = function moveToExtensions(proto, opts) {
 
   return opts;
 };
-},{"../config/config":432,"../entities/entityType":450,"../events/eventType":487,"lodash":216,"moment":222,"node-uuid":223,"uri-js":347,"validator":354}]},{},[422,426,427,423,424,430,425,432,433,434,435,436,437,438,439,440,441,442,443,444,445,446,447,448,449,450,451,452,453,454,455,456,457,458,459,460,461,462,463,464,465,466,467,468,469,470,471,472,473,474,475,476,477,478,479,480,481,482,483,484,485,486,487,488,489,490,491,492,493,494,495,496,497,498,499,500,501,502,503]);
+},{"../config/config":426,"../entities/entityType":444,"../events/eventType":481,"lodash":216,"moment":222,"node-uuid":223,"uri-js":347,"validator":354}]},{},[422,423,424,425,426,427,428,429,430,431,432,433,434,435,436,437,438,439,440,441,442,443,444,445,446,447,448,449,450,451,452,453,454,455,456,457,458,459,460,461,462,463,464,465,466,467,468,469,470,471,472,473,474,475,476,477,478,479,480,481,482,483,484,485,486,487,488,489,490,491,492,493,494,495,496,497]);
