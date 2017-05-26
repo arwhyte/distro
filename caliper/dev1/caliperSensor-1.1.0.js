@@ -96023,7 +96023,6 @@ var request = require('request');
 var url = require('url');
 
 var config = require('../config/config');
-var options = require('./httpRequestOptions');
 var clientUtils = require('./clientUtils');
 
 /**
@@ -96032,9 +96031,9 @@ var clientUtils = require('./clientUtils');
  * @type {{}}
  */
 var self = this;
-var id;
-var initialized = false;
-var options;
+//var id;
+//var initialized = false;
+//var options;
 
 /**
  * Initializes the default client to use.
@@ -96056,7 +96055,7 @@ self.initialize = function initialize(id, options) {
  * @returns {boolean}
  */
 self.isInitialized = function isInitialized() {
-  return initialized;
+  return this.initialized;
 };
 
 /**
@@ -96167,7 +96166,7 @@ module.exports = {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"../config/config":430,"../logger":496,"./clientUtils":425,"./httpRequestOptions":429,"buffer":104,"lodash":216,"request":268,"url":348}],424:[function(require,module,exports){
+},{"../config/config":430,"../logger":496,"./clientUtils":425,"buffer":104,"lodash":216,"request":268,"url":348}],424:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
@@ -96515,7 +96514,7 @@ module.exports = {
 }).call(this,require("buffer").Buffer)
 },{"../config/config":430,"../logger":496,"./clientUtils":425,"./httpOptions":428,"buffer":104,"http":325,"https":194,"lodash":216}],427:[function(require,module,exports){
 arguments[4][423][0].apply(exports,arguments)
-},{"../config/config":430,"../logger":496,"./clientUtils":425,"./httpRequestOptions":429,"buffer":104,"dup":423,"lodash":216,"request":268,"url":348}],428:[function(require,module,exports){
+},{"../config/config":430,"../logger":496,"./clientUtils":425,"buffer":104,"dup":423,"lodash":216,"request":268,"url":348}],428:[function(require,module,exports){
 /*
  * This file is part of IMS Caliper Analytics™ and is licensed to
  * IMS Global Learning Consortium, Inc. (http://www.imsglobal.org)
