@@ -96047,8 +96047,6 @@ self.initialize = function initialize(id, options) {
   _.isNil(id) ? self.error(messages[1]) : this.id = id;
   _.isEmpty(options) ? self.error(messages[5]) : this.options = options;
   this.initialized = true;
-
-  //console.log("CLIENTINIT: " + this.isInitialized());
 };
 
 /**
@@ -96090,9 +96088,9 @@ self.getOptions = function getOptions() {
 self.send = function send(envelope) {
 
   console.log("CLIENT_THIS_INIT: " + this.initialized);
-  console.log("CLIENT_SELF_INIT: " + self.isInitialized());
+  console.log("CLIENT_SELF_INIT: " + isInitialized());
 
-  if (!self.isInitialized()) {
+  if (!isInitialized()) {
     self.error(messages[0]);
   }
   if (_.isEmpty(envelope)) {
