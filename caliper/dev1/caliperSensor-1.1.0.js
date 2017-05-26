@@ -96088,9 +96088,9 @@ self.getOptions = function getOptions() {
 self.send = function send(envelope) {
 
   console.log("CLIENT_THIS_INIT: " + this.initialized);
-  console.log("CLIENT_SELF_INIT: " + isInitialized());
+  console.log("CLIENT_SELF_INIT: " + self.isInitialized());
 
-  if (!isInitialized()) {
+  if (!self.isInitialized()) {
     self.error(messages[0]);
   }
   if (_.isEmpty(envelope)) {
