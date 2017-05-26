@@ -96044,8 +96044,8 @@ var options;
  * @param id client identifier
  */
 self.initialize = function initialize(id, options) {
-  _.isNil(id) ? this.error(messages[1]) : this.id = id;
-  _.isEmpty(options) ? this.error(messages[5]) : this.options = options;
+  _.isNil(id) ? self.error(messages[1]) : this.id = id;
+  _.isEmpty(options) ? self.error(messages[5]) : this.options = options;
   this.initialized = true;
 
   //console.log("CLIENTINIT: " + this.isInitialized());
@@ -96088,19 +96088,19 @@ self.getOptions = function getOptions() {
  * @param envelope
  */
 self.send = function send(envelope) {
-  if (!this.isInitialized()) {
-    this.error(messages[0]);
+  if (!self.isInitialized()) {
+    self.error(messages[0]);
   }
   if (_.isEmpty(envelope)) {
-    this.error(messages[3]);
+    self.error(messages[3]);
   }
 
   // Calculate Envelope length and then stringify it.
   var contentLength = Buffer.byteLength(envelope); // decimal number of OCTETS per RFC 2616
-  var stringEntity = this.stringify(envelope);
+  var stringEntity = self.stringify(envelope);
 
   // Retrieve options and add Content-Length header and body.
-  var opts = this.getOptions();
+  var opts = self.getOptions();
   opts.headers["Content-Length"] = contentLength;
   opts.body = stringEntity;
 
@@ -98988,7 +98988,7 @@ var clients = new hashMap();
  * @param id sensor identifier
  */
 Sensor.initialize = function initialize(id) {
-  _.isNil(id) ? this.error(messages[1]) : this.id = id;
+  _.isNil(id) ? Sensor.error(messages[1]) : this.id = id;
   this.initialized = true;
 };
 
@@ -99061,14 +99061,14 @@ Sensor.getClients = function getClients() {
  * @returns {*}
  */
 Sensor.createEnvelope = function createEnvelope(opts) {
-  if (!this.isInitialized()) {
-    this.error(messages[0]);
+  if (!Sensor.isInitialized()) {
+    Sensor.error(messages[0]);
   }
   if (_.isNil(opts.data)) {
-    this.error(messages[2]);
+    Sensor.error(messages[2]);
   }
 
-  var id = opts.id || this.getId(); // permit override with opts value?
+  var id = opts.id || Sensor.getId(); // permit override with opts value?
   var sendTime = opts.sendTime || moment.utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ");
   var dataVersion = opts.dataVersion || config.dataVersion;
   var payload = [];
@@ -99090,15 +99090,14 @@ Sensor.createEnvelope = function createEnvelope(opts) {
  * @param envelope
  */
 Sensor.sendToClient = function sendToClient(client, envelope) {
-  /**
-   if (!self.isInitialized()) {
-    self.error(messages[0]);
+  if (!Sensor.isInitialized()) {
+    Sensor.error(messages[0]);
   }
-   */
+
   if (clients.has(client.id)) {
     client.send(envelope);
   } else {
-    this.error(messages[4]);
+    Sensor.error(messages[4]);
   }
 };
 
@@ -99109,18 +99108,16 @@ Sensor.sendToClient = function sendToClient(client, envelope) {
  * @param envelope
  */
 Sensor.sendToClients = function sendToClients(envelope) {
-  /**
-   if (!self.isInitialized()) {
-    self.error(messages[0]);
+  if (!Sensor.isInitialized()) {
+    Sensor.error(messages[0]);
   }
-   */
 
   if (clients.count() > 0) {
     clients.forEach(function(client) {
       client.send(envelope);
     });
   } else {
-    this.error(message[3])
+    Sensor.error(message[3])
   }
 };
 
