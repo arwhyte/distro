@@ -96056,7 +96056,7 @@ self.initialize = function initialize(id, options) {
  * @returns {boolean}
  */
 self.isInitialized = function isInitialized() {
-  return this.initialized;
+  return initialized;
 };
 
 /**
